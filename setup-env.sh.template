@@ -1,0 +1,96 @@
+#!/bin/bash
+
+# Environment Setup Script Template
+# Copy this file to setup-env.sh and fill in your values
+# Usage: source setup-env.sh [dev|prod]
+
+# Determine environment
+ENVIRONMENT="${1:-dev}"
+echo "Setting up environment: $ENVIRONMENT"
+
+# === SUPABASE CONFIGURATION ===
+# Get these from your Supabase project settings (Settings -> API)
+
+if [ "$ENVIRONMENT" = "prod" ]; then
+    # Production Supabase
+    export SUPABASE_URL="https://YOUR_PROD_PROJECT.supabase.co"
+    export SUPABASE_ANON_KEY="YOUR_PROD_ANON_KEY"
+    export SUPABASE_SERVICE_ROLE_KEY="YOUR_PROD_SERVICE_ROLE_KEY"
+    export SUPABASE_PROJECT_REF="YOUR_PROD_PROJECT_REF"
+    export SUPABASE_DB_PASSWORD="YOUR_PROD_DB_PASSWORD"
+    export SUPABASE_ACCESS_TOKEN="YOUR_SUPABASE_ACCESS_TOKEN"
+else
+    # Development Supabase
+    export SUPABASE_URL="https://YOUR_DEV_PROJECT.supabase.co"
+    export SUPABASE_ANON_KEY="YOUR_DEV_ANON_KEY"
+    export SUPABASE_SERVICE_ROLE_KEY="YOUR_DEV_SERVICE_ROLE_KEY"
+    export SUPABASE_PROJECT_REF="YOUR_DEV_PROJECT_REF"
+    export SUPABASE_DB_PASSWORD="YOUR_DEV_DB_PASSWORD"
+    export SUPABASE_ACCESS_TOKEN="YOUR_SUPABASE_ACCESS_TOKEN"
+fi
+
+# === CLOUDFLARE CONFIGURATION ===
+# Account ID: Found in Cloudflare dashboard right sidebar
+# API Token: Create at https://dash.cloudflare.com/profile/api-tokens
+#   - Use "Edit Cloudflare Workers" template
+#   - Add permission: Account:Cloudflare Pages:Edit
+
+export CLOUDFLARE_ACCOUNT_ID="YOUR_CLOUDFLARE_ACCOUNT_ID"
+export CLOUDFLARE_API_TOKEN="YOUR_CLOUDFLARE_API_TOKEN"
+
+if [ "$ENVIRONMENT" = "prod" ]; then
+    export CLOUDFLARE_PROJECT_NAME="your-app-prod"
+else
+    export CLOUDFLARE_PROJECT_NAME="your-app-dev"
+fi
+
+# === OPTIONAL: OTHER API KEYS ===
+# Add any other service API keys here
+# export STRIPE_API_KEY="sk_test_..."
+# export SENDGRID_API_KEY="SG...."
+
+# === VALIDATION ===
+# Check that required variables are set
+REQUIRED_VARS=(
+    "SUPABASE_URL"
+    "SUPABASE_ANON_KEY"
+    "SUPABASE_PROJECT_REF"
+    "CLOUDFLARE_ACCOUNT_ID"
+    "CLOUDFLARE_API_TOKEN"
+    "CLOUDFLARE_PROJECT_NAME"
+)
+
+ALL_SET=true
+for var in "${REQUIRED_VARS[@]}"; do
+    if [ -z "${!var}" ] || [[ "${!var}" == *"YOUR_"* ]]; then
+        echo "❌ $var is not properly set"
+        ALL_SET=false
+    else
+        echo "✅ $var is set"
+    fi
+done
+
+if [ "$ALL_SET" = true ]; then
+    echo ""
+    echo "✅ Environment setup complete for: $ENVIRONMENT"
+    echo ""
+    echo "Supabase Project: $SUPABASE_PROJECT_REF"
+    echo "Cloudflare Project: $CLOUDFLARE_PROJECT_NAME"
+    echo ""
+    echo "You can now run:"
+    echo "  ./deploy_backend.sh  - Deploy Supabase Edge Functions"
+    echo "  ./deploy_frontend.sh - Deploy to Cloudflare Pages"
+else
+    echo ""
+    echo "❌ Please update setup-env.sh with your actual values"
+    echo ""
+    echo "Get Supabase values from:"
+    echo "  https://app.supabase.com/project/_/settings/api"
+    echo ""
+    echo "Get Cloudflare values from:"
+    echo "  Account ID: Cloudflare dashboard sidebar"
+    echo "  API Token: https://dash.cloudflare.com/profile/api-tokens"
+fi
+
+# Export environment name for scripts
+export ENVIRONMENT

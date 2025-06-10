@@ -1,0 +1,33 @@
+# Supabase Configuration
+
+[api]
+# API endpoint configuration
+enabled = true
+# Port for local development
+port = 54321
+schemas = ["public"]
+
+[auth]
+# JWT configuration for edge functions
+enabled = true
+
+[auth.jwt]
+# These will be replaced with your project's values
+secret = "super-secret-jwt-token-with-at-least-32-characters-long"
+
+# Email auth settings
+[auth.email]
+enable_signup = true
+enable_confirmations = true
+
+# Configure email templates in Supabase dashboard
+
+[db]
+# Database configuration
+port = 54322
+major_version = 15
+
+[studio]
+# Supabase Studio configuration
+enabled = true
+port = 54323

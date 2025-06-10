@@ -1,0 +1,53 @@
+# Environment and secrets
+setup-env.sh
+.env
+.env.local
+.env.*.local
+
+# Generated files
+frontend/env.js
+
+# Dependencies
+node_modules/
+.npm/
+
+# Supabase
+.supabase/
+supabase/.branches
+supabase/.temp
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+coverage/
+.nyc_output/
+
+# Build outputs
+dist/
+build/
+.cache/
+
+# Cloudflare
+.wrangler/
+wrangler.toml
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+.temp/

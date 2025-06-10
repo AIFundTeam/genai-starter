@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - App Template</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="logo">
+                <img src="logo.svg" alt="Logo" width="32" height="32">
+                <h1>App Template</h1>
+            </div>
+            <nav>
+                <a href="index.html">Home</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <div class="auth-container">
+            <div class="auth-card">
+                <h2>Sign In</h2>
+                <p>Enter your email to receive a magic link</p>
+                
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email" 
+                            placeholder="you@example.com"
+                            required
+                            autofocus
+                        >
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-block">
+                        Send Magic Link
+                    </button>
+                </form>
+                
+                <div class="auth-footer">
+                    <p>We'll send you a secure link to sign in. No password needed!</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Your App. Built with the Full-Stack Template.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="env.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase.js"></script>
+    <script src="auth.js"></script>
+</body>
+</html>

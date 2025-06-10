@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome - App Template</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="logo">
+                <img src="logo.svg" alt="Logo" width="32" height="32">
+                <h1>App Template</h1>
+            </div>
+            <nav>
+                <div id="user-info" style="display: none;">
+                    <span id="user-email"></span>
+                    <span id="user-role"></span>
+                    <a href="#" id="sign-out-btn" style="display: none;">Sign Out</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Public content (shown when not logged in) -->
+        <div id="public-content">
+            <section class="hero">
+                <h2>Welcome to Your App</h2>
+                <p>This is a full-stack web application template with authentication, database, and edge functions.</p>
+                <div class="cta-buttons">
+                    <a href="login.html" class="btn btn-primary">Sign In</a>
+                    <a href="#features" class="btn btn-secondary">Learn More</a>
+                </div>
+            </section>
+
+            <section id="features" class="features">
+                <h3>Features</h3>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>🔐 Secure Authentication</h4>
+                        <p>Magic link authentication with Supabase Auth</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🚀 Edge Functions</h4>
+                        <p>Serverless backend with Deno runtime</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🗄️ PostgreSQL Database</h4>
+                        <p>Scalable database with Row Level Security</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🌐 Global CDN</h4>
+                        <p>Fast delivery via Cloudflare Pages</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Authenticated content (shown when logged in) -->
+        <div id="auth-content" style="display: none;">
+            <section class="dashboard">
+                <h2>Dashboard</h2>
+                <p>Welcome back! You're now logged in.</p>
+                <div class="quick-actions">
+                    <a href="app.html" class="btn btn-primary">Go to App</a>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Your App. Built with the Full-Stack Template.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="env.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase.js"></script>
+    <script src="auth.js"></script>
+    <script src="index.js"></script>
+</body>
+</html>
