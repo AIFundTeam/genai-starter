@@ -3,6 +3,9 @@
 # Environment Setup Script Template
 # Copy this file to setup-env.sh and fill in your values
 # Usage: source setup-env.sh [dev|prod]
+#
+# IMPORTANT: When creating a Supabase project, save the database password!
+# It's only shown once and you'll need it for SUPABASE_DB_PASSWORD below.
 
 # Determine environment
 ENVIRONMENT="${1:-dev}"
@@ -10,24 +13,26 @@ echo "Setting up environment: $ENVIRONMENT"
 
 # === SUPABASE CONFIGURATION ===
 # Get these from your Supabase project settings (Settings -> API)
+# IMPORTANT: Save your database password when creating the project - it's only shown once!
 
 if [ "$ENVIRONMENT" = "prod" ]; then
     # Production Supabase
-    export SUPABASE_URL="https://YOUR_PROD_PROJECT.supabase.co"
+    export SUPABASE_PROJECT_REF="YOUR_PROD_PROJECT_REF"  # e.g., "xyzcompanyorxyz"
     export SUPABASE_ANON_KEY="YOUR_PROD_ANON_KEY"
     export SUPABASE_SERVICE_ROLE_KEY="YOUR_PROD_SERVICE_ROLE_KEY"
-    export SUPABASE_PROJECT_REF="YOUR_PROD_PROJECT_REF"
-    export SUPABASE_DB_PASSWORD="YOUR_PROD_DB_PASSWORD"
-    export SUPABASE_ACCESS_TOKEN="YOUR_SUPABASE_ACCESS_TOKEN"
+    export SUPABASE_DB_PASSWORD="YOUR_PROD_DB_PASSWORD"  # Saved from project creation!
+    export SUPABASE_ACCESS_TOKEN="YOUR_SUPABASE_ACCESS_TOKEN"  # From app.supabase.com/account/tokens
 else
     # Development Supabase
-    export SUPABASE_URL="https://YOUR_DEV_PROJECT.supabase.co"
+    export SUPABASE_PROJECT_REF="YOUR_DEV_PROJECT_REF"  # e.g., "xyzcompanyorxyz"
     export SUPABASE_ANON_KEY="YOUR_DEV_ANON_KEY"
     export SUPABASE_SERVICE_ROLE_KEY="YOUR_DEV_SERVICE_ROLE_KEY"
-    export SUPABASE_PROJECT_REF="YOUR_DEV_PROJECT_REF"
-    export SUPABASE_DB_PASSWORD="YOUR_DEV_DB_PASSWORD"
-    export SUPABASE_ACCESS_TOKEN="YOUR_SUPABASE_ACCESS_TOKEN"
+    export SUPABASE_DB_PASSWORD="YOUR_DEV_DB_PASSWORD"  # Saved from project creation!
+    export SUPABASE_ACCESS_TOKEN="YOUR_SUPABASE_ACCESS_TOKEN"  # From app.supabase.com/account/tokens
 fi
+
+# Derive Supabase URL from project ref
+export SUPABASE_URL="https://${SUPABASE_PROJECT_REF}.supabase.co"
 
 # === CLOUDFLARE CONFIGURATION ===
 # Account ID: Found in Cloudflare dashboard right sidebar
@@ -62,7 +67,9 @@ REQUIRED_VARS=(
 
 ALL_SET=true
 for var in "${REQUIRED_VARS[@]}"; do
-    if [ -z "${!var}" ] || [[ "${!var}" == *"YOUR_"* ]]; then
+    # Use eval for shell compatibility (works in bash, zsh, sh)
+    eval "value=\$$var"
+    if [ -z "$value" ] || echo "$value" | grep -q "YOUR_"; then
         echo "❌ $var is not properly set"
         ALL_SET=false
     else
@@ -85,7 +92,9 @@ else
     echo "❌ Please update setup-env.sh with your actual values"
     echo ""
     echo "Get Supabase values from:"
-    echo "  https://app.supabase.com/project/_/settings/api"
+    echo "  Settings → API: Project Ref, Anon Key, Service Role Key"
+    echo "  Settings → Database: Database Password (saved from creation)"
+    echo "  Account → Access Tokens: Access Token for deployments"
     echo ""
     echo "Get Cloudflare values from:"
     echo "  Account ID: Cloudflare dashboard sidebar"

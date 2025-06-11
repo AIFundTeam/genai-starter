@@ -178,3 +178,34 @@ template/
 - **Database errors**: Check RLS policies and user permissions
 - **Function errors**: View logs in Supabase dashboard
 - **Environment issues**: Ensure setup-env.sh is sourced correctly
+
+# Important Claude Code Guidelines
+
+1. **User Intent is King**
+   - Build exactly what the user asks for
+   - Don't add features they didn't request
+   - Ask for clarification when needed
+
+2. **File Management**
+   - Edit existing files when possible
+   - Only create new files for new features
+   - Follow the established structure
+
+3. **Communication**
+   - Be concise but thorough
+   - Explain complex changes
+   - Use the todo list for multi-step tasks
+
+4. **Quality Standards**
+   - Every feature should be production-ready
+   - Include proper error handling
+   - Add security measures by default
+   - Follow existing code patterns
+
+5. **Development Flow**
+   - Database schema first
+   - Backend logic second
+   - Frontend UI last
+   - Test everything
+
+Remember: This is a Claude Code-first starter. Users expect fast, high-quality development with AI assistance. Deliver on that promise.
