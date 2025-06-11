@@ -98,9 +98,15 @@ Claude Code will:
 
 ### 5. Setup Database
 
-1. Go to Supabase Dashboard → SQL Editor
-2. Copy contents of `sql/schema.sql` (or your customized version)
-3. Run the SQL to create tables and policies
+```bash
+# Make sure you've sourced your environment first
+source setup-env.sh dev
+
+# Run the database setup (WARNING: drops existing tables!)
+./setup_database.sh
+```
+
+**Important**: This script is idempotent but destructive - it drops and recreates all tables each time it runs. This ensures a clean state but will DELETE ALL DATA. Perfect for development, but don't run on production data!
 
 ### 6. Configure Authentication
 
@@ -130,17 +136,12 @@ Claude Code will:
 # "Deploy the frontend to Cloudflare"
 
 # Or run manually:
-
-```bash
-# Load environment variables
 source setup-env.sh dev  # or 'prod' for production
-
-# Deploy backend (Supabase Edge Functions)
-./deploy_backend.sh
-
-# Deploy frontend (Cloudflare Pages)
-./deploy_frontend.sh
+./deploy_backend.sh      # Deploy backend (Supabase Edge Functions)
+./deploy_frontend.sh     # Deploy frontend (Cloudflare Pages)
 ```
+
+**Note**: The first time you deploy, Supabase CLI will link your project. This is a one-time setup per environment.
 
 ## Development with Claude Code
 
@@ -209,13 +210,16 @@ curl https://<project-ref>.supabase.co/functions/v1/protected-endpoint \
 
 ## Customization
 
-### Adding Features - The Claude Code Way
+### Building Your App - The Claude Code Way
 
 ```bash
-# Adding a new page
-"Create a user settings page with theme preferences"
+# Build your main app
+"Build a project management app with tasks and deadlines"
 
-# Adding an edge function
+# Add features
+"Add a kanban board view to the tasks"
+
+# Add an edge function
 "Add an API endpoint to export user data as CSV"
 
 # Database changes
@@ -223,8 +227,8 @@ curl https://<project-ref>.supabase.co/functions/v1/protected-endpoint \
 ```
 
 Claude Code will handle:
-- Creating all necessary files
-- Setting up proper routing
+- Modifying index.html/js for your app
+- Creating edge functions
 - Adding RLS policies
 - Updating the schema
 - Maintaining consistency

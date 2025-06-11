@@ -28,8 +28,13 @@ if ! command -v supabase &> /dev/null; then
 fi
 
 # Link the project (if not already linked)
-echo -e "\n${GREEN}Linking Supabase project...${NC}"
-supabase link --project-ref "$SUPABASE_PROJECT_REF" --password "$SUPABASE_DB_PASSWORD" 2>/dev/null || true
+echo -e "\n${GREEN}Checking Supabase project link...${NC}"
+if [ ! -f "supabase/.temp/project-ref" ] || [ "$(cat supabase/.temp/project-ref 2>/dev/null)" != "$SUPABASE_PROJECT_REF" ]; then
+    echo -e "${YELLOW}Linking to project: $SUPABASE_PROJECT_REF${NC}"
+    supabase link --project-ref "$SUPABASE_PROJECT_REF" --password "$SUPABASE_DB_PASSWORD"
+else
+    echo -e "${GREEN}Already linked to project: $SUPABASE_PROJECT_REF${NC}"
+fi
 
 # Deploy all edge functions
 echo -e "\n${GREEN}Deploying edge functions...${NC}"
@@ -43,6 +48,7 @@ else
     for func in $FUNCTIONS; do
         echo -e "\n${YELLOW}Deploying function: $func${NC}"
         supabase functions deploy "$func" \
+            --use-api \
             --project-ref "$SUPABASE_PROJECT_REF" \
             --no-verify-jwt
         

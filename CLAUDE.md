@@ -42,11 +42,9 @@ supabase functions deploy <function-name> --project-ref $SUPABASE_PROJECT_REF
 ```
 template/
 ├── frontend/               # Frontend application
-│   ├── index.html         # Landing page
-│   ├── app.html           # Main application page
+│   ├── index.html         # Main application (requires authentication)
 │   ├── login.html         # Login page
-│   ├── index.js           # Landing page logic
-│   ├── app.js             # Main app logic
+│   ├── index.js           # Main app logic
 │   ├── auth.js            # Authentication utilities
 │   ├── supabase.js        # Supabase client
 │   ├── style.css          # Styles
@@ -66,6 +64,23 @@ template/
 ├── CLAUDE.md             # This file
 └── README.md             # Setup instructions
 ```
+
+### Page Structure
+
+**Simple two-page architecture:**
+- `index.html` - The MAIN APPLICATION (requires authentication)
+- `login.html` - The authentication page
+
+**Authentication Flow:**
+1. User visits site → redirected to `login.html` if not authenticated
+2. User logs in → redirected to `index.html` (main app)
+3. All app functionality lives in `index.html`
+
+**When users ask you to build features:**
+- ✅ ALWAYS modify `index.html` and `index.js` for app functionality
+- ✅ Update schema.sql for database changes
+- ✅ Create edge functions for backend logic
+- ❌ NEVER create app.html or other HTML files unless specifically requested
 
 ### Key Patterns
 
@@ -96,6 +111,7 @@ template/
    - Audit fields (created_at, updated_at, created_by)
    - User roles (user, admin)
    - Soft delete pattern where appropriate
+   - **Idempotent schema**: setup_database.sh drops and recreates tables
 
 5. **Security Best Practices**
    - Never expose API keys in frontend
@@ -106,11 +122,10 @@ template/
 
 ### Adding New Features
 
-1. **New Page**
-   - Create HTML file in frontend/
-   - Create corresponding JS file
-   - Add navigation logic in auth.js
-   - Update auth routing if needed
+1. **New Page (rarely needed)**
+   - Most features should be added to index.html
+   - Only create new pages if specifically requested
+   - Update auth.js routing if adding pages
 
 2. **New Edge Function**
    - Create folder in supabase/functions/
@@ -129,7 +144,38 @@ template/
    - Document in README.md
    - Use in code via env.js (frontend) or Deno.env (backend)
 
-### Common Tasks
+### Common User Requests and How to Handle Them
+
+1. **"Build a [todo/notes/task/etc] app"**
+   - Modify `index.html` and `index.js` for the app UI
+   - Update schema.sql with appropriate tables
+   - Create edge functions for CRUD operations
+   - Add realtime subscriptions if needed
+
+2. **"Add user profiles"**
+   - Create profiles table in schema.sql
+   - Add RLS policies for security
+   - Update index.html with profile UI
+   - Create profile management edge functions
+
+3. **"Add file uploads"**
+   - Use Supabase Storage buckets
+   - Create storage policies
+   - Add upload UI to index.html
+   - Handle file metadata in database
+
+4. **"Add payment processing"**
+   - Integrate Stripe via edge functions
+   - Add subscription/payment tables
+   - Create checkout flow in index.html
+   - Handle webhooks securely
+
+5. **"Make it real-time"**
+   - Enable realtime on relevant tables
+   - Add subscription handlers in index.js
+   - Update UI reactively on changes
+
+### Common Implementation Patterns
 
 1. **Check Authentication Status**
    ```javascript

@@ -41,16 +41,16 @@ document.addEventListener('DOMContentLoaded', () => {
 function handleAuthRouting() {
     const path = window.location.pathname;
     const isLoginPage = path.includes('login');
-    const isPublicPage = path === '/' || path.includes('index.html') || isLoginPage;
+    const isIndexPage = path === '/' || path.includes('index.html');
 
-    if (!currentUser && !isPublicPage) {
-        // Not logged in and not on public page - redirect to login
+    if (!currentUser && isIndexPage) {
+        // Not logged in and on main app page - redirect to login
         console.log('Redirecting to login...');
         window.location.href = 'login.html';
     } else if (currentUser && isLoginPage) {
-        // Logged in but on login page - redirect to app
+        // Logged in but on login page - redirect to main app
         console.log('Redirecting to app...');
-        window.location.href = 'app.html';
+        window.location.href = 'index.html';
     }
 }
 
@@ -146,7 +146,7 @@ function setupEventListeners() {
                 const { error } = await supabase.auth.signInWithOtp({
                     email,
                     options: {
-                        emailRedirectTo: `${window.location.origin}/app.html`
+                        emailRedirectTo: `${window.location.origin}/index.html`
                     }
                 });
                 

@@ -22,6 +22,7 @@ if [ "$ENVIRONMENT" = "prod" ]; then
     export SUPABASE_SERVICE_ROLE_KEY="YOUR_PROD_SERVICE_ROLE_KEY"
     export SUPABASE_DB_PASSWORD="YOUR_PROD_DB_PASSWORD"  # Saved from project creation!
     export SUPABASE_ACCESS_TOKEN="YOUR_SUPABASE_ACCESS_TOKEN"  # From app.supabase.com/account/tokens
+    export CLOUDFLARE_PROJECT_NAME="your-app-prod"
 else
     # Development Supabase
     export SUPABASE_PROJECT_REF="YOUR_DEV_PROJECT_REF"  # e.g., "xyzcompanyorxyz"
@@ -29,6 +30,7 @@ else
     export SUPABASE_SERVICE_ROLE_KEY="YOUR_DEV_SERVICE_ROLE_KEY"
     export SUPABASE_DB_PASSWORD="YOUR_DEV_DB_PASSWORD"  # Saved from project creation!
     export SUPABASE_ACCESS_TOKEN="YOUR_SUPABASE_ACCESS_TOKEN"  # From app.supabase.com/account/tokens
+    export CLOUDFLARE_PROJECT_NAME="your-app-dev"
 fi
 
 # Derive Supabase URL from project ref
@@ -42,12 +44,6 @@ export SUPABASE_URL="https://${SUPABASE_PROJECT_REF}.supabase.co"
 
 export CLOUDFLARE_ACCOUNT_ID="YOUR_CLOUDFLARE_ACCOUNT_ID"
 export CLOUDFLARE_API_TOKEN="YOUR_CLOUDFLARE_API_TOKEN"
-
-if [ "$ENVIRONMENT" = "prod" ]; then
-    export CLOUDFLARE_PROJECT_NAME="your-app-prod"
-else
-    export CLOUDFLARE_PROJECT_NAME="your-app-dev"
-fi
 
 # === OPTIONAL: OTHER API KEYS ===
 # Add any other service API keys here

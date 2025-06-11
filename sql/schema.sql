@@ -1,10 +1,18 @@
 -- Full-Stack App Template Database Schema
+-- This script is idempotent - it can be run multiple times safely
+-- Existing tables and objects will be dropped and recreated
 
 -- Enable necessary extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- Drop existing objects to ensure clean state
+DROP TABLE IF EXISTS items CASCADE;
+DROP TABLE IF EXISTS user_roles CASCADE;
+DROP FUNCTION IF EXISTS update_updated_at_column() CASCADE;
+DROP FUNCTION IF EXISTS handle_new_user() CASCADE;
+
 -- User roles table
-CREATE TABLE IF NOT EXISTS user_roles (
+CREATE TABLE user_roles (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin')),
@@ -14,7 +22,7 @@ CREATE TABLE IF NOT EXISTS user_roles (
 );
 
 -- Example items table
-CREATE TABLE IF NOT EXISTS items (
+CREATE TABLE items (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
