@@ -46,6 +46,22 @@ fi
 echo -e "${GREEN}✓ Using env.js from setup-env.sh${NC}"
 echo ""
 
+# Check if project exists, create if it doesn't
+echo -e "${GREEN}Checking if project exists...${NC}"
+PROJECT_CHECK=$(wrangler pages project list 2>&1 | grep -w "$CLOUDFLARE_PROJECT_NAME" || true)
+
+if [ -z "$PROJECT_CHECK" ]; then
+    echo -e "${YELLOW}Project '$CLOUDFLARE_PROJECT_NAME' not found. Creating...${NC}"
+    wrangler pages project create "$CLOUDFLARE_PROJECT_NAME" --production-branch=main
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}Error: Failed to create Cloudflare Pages project.${NC}"
+        exit 1
+    fi
+    echo -e "${GREEN}✓ Project created successfully${NC}"
+else
+    echo -e "${GREEN}✓ Project already exists${NC}"
+fi
+
 # Deploy the frontend and capture output
 echo -e "${GREEN}Deploying to Cloudflare Pages...${NC}"
 DEPLOY_OUTPUT=$(wrangler pages deploy "$FRONTEND_DIR" --project-name="$CLOUDFLARE_PROJECT_NAME" 2>&1)
