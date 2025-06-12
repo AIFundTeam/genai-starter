@@ -20,8 +20,8 @@ cp env.config.template env.config
 # Edit env.config with your Supabase and Cloudflare credentials
 source setup-env.sh
 
-# Database setup (run once)
-# Execute sql/schema.sql content in Supabase SQL editor
+# Database setup
+./setup_database.sh
 
 # Deploy backend (Supabase Edge Functions)
 ./deploy_backend.sh
@@ -337,11 +337,12 @@ The template includes a working OpenAI integration example in `test-llm` functio
 
 ### Troubleshooting
 
-- **User issues**: Check localStorage for userEmail key
-- **CORS errors**: Verify frontend URL in CORS configuration
-- **Database errors**: Check RLS policies and user permissions
-- **Function errors**: View logs in Supabase dashboard
-- **Environment issues**: Ensure setup-env.sh is sourced correctly
+- **Login issues**: Check localStorage for userEmail key
+- **CORS errors**: Verify frontend URL in CORS configuration (update _shared/cors.ts)
+- **Database errors**: Check that tables exist (run ./setup_database.sh) and RLS policies are open
+- **Function 401/403 errors**: Ensure functions deployed with --no-verify-jwt flag
+- **"Missing Supabase configuration"**: Check that env.js exists and is loaded first
+- **OpenAI errors**: Verify API key is set and has active billing
 
 # Important Claude Code Guidelines
 

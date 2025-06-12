@@ -264,25 +264,27 @@ For multiple environments (dev/staging/prod), create separate copies of `setup-e
 
 ## Troubleshooting
 
-### "Invalid JWT" errors
-- Check that you're using the correct anon key
-- Ensure cookies are enabled
-- Try logging out and back in
+### "Missing Supabase configuration" errors
+- Ensure `env.js` exists (created by deploy_frontend.sh)
+- Check that `env.js` is loaded FIRST in your HTML files
+- Verify SUPABASE_URL and SUPABASE_ANON_KEY are set correctly
 
 ### CORS errors
 - Update `allowedOrigins` in `_shared/cors.ts`
 - Redeploy edge functions
 - Check browser console for specific origin
 
-### Database permission errors
-- Check RLS policies are enabled
-- Verify user has correct role
+### Database connection errors
+- Check that RLS policies allow access (they should be open)
+- Verify the items table exists (run ./setup_database.sh)
 - Test queries in Supabase SQL editor
+- Ensure anon key has correct permissions
 
-### Email not sending
-- Check spam folder
-- Verify email settings in Supabase
-- Ensure email provider is configured
+### Edge function errors (401/403)
+- Ensure functions are deployed with --no-verify-jwt flag
+- Check OPENAI_API_KEY is set in Supabase secrets
+- Verify Supabase access token is valid
+- Try redeploying with ./deploy_backend.sh
 
 ## Working with Claude Code
 

@@ -94,7 +94,8 @@ EOF
     fi
     
     echo -e "\n${GREEN}Next steps:${NC}"
-    echo "  1. Deploy backend: ./deploy_backend.sh"
-    echo "  2. Deploy frontend: ./deploy_frontend.sh"
-    echo "  3. Test your setup in the browser"
+    echo "  1. Setup database: ./setup_database.sh"
+    echo "  2. Deploy backend: ./deploy_backend.sh"
+    echo "  3. Deploy frontend: ./deploy_frontend.sh"
+    echo "  4. Test your setup in the browser"
 fi
