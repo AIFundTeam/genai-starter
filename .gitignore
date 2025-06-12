@@ -15,6 +15,7 @@ node_modules/
 .supabase/
 supabase/.branches
 supabase/.temp
+supabase/migrations/
 
 # IDE
 .vscode/

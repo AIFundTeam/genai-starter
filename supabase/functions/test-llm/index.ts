@@ -1,68 +1,33 @@
-import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { corsHeaders } from "../_shared/cors.ts";
+// Test LLM integration - no authentication required
+import { corsHeaders, handleCors } from '../_shared/cors.ts';
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   // Handle CORS preflight
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
-  }
+  const corsResponse = handleCors(req);
+  if (corsResponse) return corsResponse;
 
   try {
-    // Verify authentication
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: "No authorization header" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // Create Supabase client with user's JWT
-    const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-      {
-        global: { headers: { Authorization: authHeader } },
-      }
-    );
-
-    // Verify the user
-    const {
-      data: { user },
-      error: userError,
-    } = await supabaseClient.auth.getUser();
-
-    if (userError || !user) {
-      return new Response(JSON.stringify({ error: "Invalid authentication" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // Get request body
-    const { prompt } = await req.json();
-    if (!prompt) {
-      return new Response(JSON.stringify({ error: "No prompt provided" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
+    // Parse request body
+    const { prompt = 'Hello', user_email = 'anonymous' } = await req.json();
+    
+    
     // Check for OpenAI API key
     const openaiApiKey = Deno.env.get("OPENAI_API_KEY");
     if (!openaiApiKey) {
+      console.log('OpenAI API key not found');
       return new Response(
         JSON.stringify({
           error: "OpenAI API key not configured",
           message: "Please set OPENAI_API_KEY in your Supabase Edge Function secrets",
         }),
         {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
         }
       );
     }
+
+    console.log(`Calling OpenAI for user: ${user_email}, prompt: ${prompt}`);
 
     // Call OpenAI API
     const openaiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -90,6 +55,7 @@ serve(async (req) => {
 
     if (!openaiResponse.ok) {
       const error = await openaiResponse.text();
+      console.error('OpenAI API error:', error);
       return new Response(
         JSON.stringify({
           error: "OpenAI API error",
@@ -97,8 +63,8 @@ serve(async (req) => {
           message: "Check your OpenAI API key and billing status",
         }),
         {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: openaiResponse.status,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
         }
       );
     }
@@ -106,32 +72,31 @@ serve(async (req) => {
     const data = await openaiResponse.json();
     const response = data.choices[0].message.content;
 
-    // Log the interaction (optional - could save to database)
-    console.log(`User ${user.email} prompted: ${prompt}`);
-    console.log(`Response: ${response}`);
-
+    // Return response
     return new Response(
       JSON.stringify({
         success: true,
         response,
-        user: user.email,
+        user: user_email,
         timestamp: new Date().toISOString(),
       }),
       {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
     );
+    
   } catch (error) {
-    console.error("Error in test-llm function:", error);
+    console.error('Error in test-llm function:', error);
+    
     return new Response(
       JSON.stringify({
-        error: "Internal server error",
-        details: error.message,
+        error: 'Internal server error',
+        message: error.message,
       }),
       {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
     );
   }

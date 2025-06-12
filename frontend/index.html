@@ -15,11 +15,8 @@
                 <h1>App Template</h1>
             </div>
             <nav>
-                <div id="user-info">
-                    <span id="user-email"></span>
-                    <span id="user-role"></span>
-                    <a href="#" id="sign-out-btn">Sign Out</a>
-                </div>
+                <span class="user-info">User: <strong id="current-user">Loading...</strong></span>
+                <button class="btn btn-small" onclick="changeUser()">Change User</button>
             </nav>
         </div>
     </header>
@@ -59,8 +56,8 @@
                         
                         <div class="test-grid">
                             <div class="test-card">
-                                <h4>1. Authentication</h4>
-                                <p>✅ You're logged in as: <strong id="test-user-email"></strong></p>
+                                <h4>1. Frontend</h4>
+                                <p>✅ Frontend deployed and running</p>
                             </div>
                             
                             <div class="test-card">
@@ -120,22 +117,21 @@
                     <h2>Settings</h2>
                     
                     <div class="settings-form">
-                        <h3>Profile</h3>
+                        <h3>Current User</h3>
                         <div class="form-group">
                             <label>Email</label>
                             <input type="email" id="settings-email" disabled>
                         </div>
                         
-                        <div class="form-group">
-                            <label>Role</label>
-                            <input type="text" id="settings-role" disabled>
-                        </div>
+                        <button class="btn btn-primary" onclick="changeUser()">
+                            Change User
+                        </button>
                         
                         <h3>Preferences</h3>
                         <div class="form-group">
                             <label>
-                                <input type="checkbox" id="email-notifications">
-                                Email Notifications
+                                <input type="checkbox" id="show-all-items">
+                                Show all users' items
                             </label>
                         </div>
                         
@@ -187,7 +183,7 @@
     <script src="env.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase.js"></script>
-    <script src="auth.js"></script>
+    <script src="user.js"></script>
     <script src="index.js"></script>
 </body>
 </html>

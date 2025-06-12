@@ -2,15 +2,8 @@
 let itemsChannel = null;
 
 // Initialize app
-document.addEventListener('DOMContentLoaded', async () => {
-    // Ensure user is authenticated
-    const user = await window.requireAuth();
-    if (!user) return;
-    
-    console.log('App initialized for user:', user.email);
-    
-    // Show user email in test section
-    document.getElementById('test-user-email').textContent = user.email;
+document.addEventListener('user-ready', async (event) => {
+    console.log('App initialized for user:', event.detail.email);
     
     // Set up navigation
     setupNavigation();
@@ -54,19 +47,16 @@ function setupNavigation() {
 async function loadDashboard() {
     try {
         // Load items count
-        const items = await window.selectFrom('items', 'id', {
-            user_id: window.getCurrentUser().id
-        });
+        const items = await window.selectFrom('items', 'id');
         document.getElementById('total-items').textContent = items.length;
         
         // Load recent activity (last 7 days)
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
         
-        const { data: activities } = await supabase
+        const { data: activities } = await supabaseClient
             .from('items')
             .select('id')
-            .eq('user_id', window.getCurrentUser().id)
             .gte('created_at', sevenDaysAgo.toISOString())
             .order('created_at', { ascending: false });
             
@@ -125,7 +115,7 @@ async function testPublicEndpoint() {
     
     try {
         const data = await window.invokeEdgeFunction('hello-world', {
-            name: window.getCurrentUser().email
+            name: 'Test User'
         });
         
         resultsDiv.innerHTML = `
@@ -146,14 +136,16 @@ async function testPublicEndpoint() {
 
 async function testProtectedEndpoint() {
     const resultsDiv = document.getElementById('test-results');
-    resultsDiv.innerHTML = '<p>⏳ Testing protected API endpoint...</p>';
+    resultsDiv.innerHTML = '<p>⏳ Testing user API endpoint...</p>';
     
     try {
-        const data = await window.invokeEdgeFunction('protected-endpoint');
+        const data = await window.invokeEdgeFunction('protected-endpoint', {
+            user_email: window.getCurrentUser()
+        });
         
         resultsDiv.innerHTML = `
             <div class="alert alert-success">
-                <strong>✅ Protected API:</strong> Authenticated as ${data.user}
+                <strong>✅ User API:</strong> ${data.user} has ${data.itemCount} items
             </div>
         `;
         testsPassed.protectedApi = true;
@@ -161,7 +153,7 @@ async function testProtectedEndpoint() {
     } catch (error) {
         resultsDiv.innerHTML = `
             <div class="alert alert-error">
-                <strong>❌ Protected API Error:</strong> ${error.message}
+                <strong>❌ User API Error:</strong> ${error.message}
             </div>
         `;
     }
@@ -184,7 +176,10 @@ async function testLLM() {
     resultsDiv.innerHTML = '<p>⏳ Testing LLM integration...</p>';
     
     try {
-        const data = await window.invokeEdgeFunction('test-llm', { prompt });
+        const data = await window.invokeEdgeFunction('test-llm', { 
+            prompt,
+            user_email: window.getCurrentUser()
+        });
         
         if (data.error) {
             throw new Error(data.message || data.error);
@@ -211,9 +206,22 @@ async function testLLM() {
 // Items functions
 async function loadItems() {
     try {
-        const items = await window.selectFrom('items', '*', {
-            user_id: window.getCurrentUser().id
-        });
+        const showAll = localStorage.getItem('show-all-items') === 'true';
+        let items;
+        
+        if (showAll) {
+            items = await window.selectFrom('items', '*');
+        } else {
+            // Only show current user's items
+            const { data, error } = await supabaseClient
+                .from('items')
+                .select('*')
+                .eq('user_email', window.getCurrentUser())
+                .order('created_at', { ascending: false });
+                
+            if (error) throw error;
+            items = data;
+        }
         
         renderItems(items);
     } catch (error) {
@@ -236,6 +244,7 @@ function renderItems(items) {
             <h4>${item.name}</h4>
             <p>${item.description || 'No description'}</p>
             <div class="item-meta">
+                <span>By: ${item.user_email}</span>
                 <span>Created: ${new Date(item.created_at).toLocaleDateString()}</span>
             </div>
             <div class="item-actions">
@@ -256,8 +265,6 @@ function subscribeToItems() {
             loadItems();
             loadDashboard(); // Update counts
         }
-    }, {
-        user_id: window.getCurrentUser().id
     });
 }
 
@@ -282,7 +289,7 @@ async function handleAddItem(event) {
         await window.insertInto('items', {
             name,
             description,
-            user_id: window.getCurrentUser().id
+            user_email: window.getCurrentUser()
         });
         
         hideAddItemModal();
@@ -311,20 +318,20 @@ async function deleteItem(id) {
 
 // Settings functions
 async function loadSettings() {
-    const user = window.getCurrentUser();
-    document.getElementById('settings-email').value = user.email;
+    // Show current user email
+    document.getElementById('settings-email').value = window.getCurrentUser();
     
-    const role = await window.getUserRole();
-    document.getElementById('settings-role').value = role || 'user';
-    
-    // Load preferences from localStorage or database
-    const notifications = localStorage.getItem('email-notifications') !== 'false';
-    document.getElementById('email-notifications').checked = notifications;
+    // Load preferences from localStorage
+    const showAll = localStorage.getItem('show-all-items') === 'true';
+    document.getElementById('show-all-items').checked = showAll;
 }
 
 function saveSettings() {
-    const notifications = document.getElementById('email-notifications').checked;
-    localStorage.setItem('email-notifications', notifications);
+    const showAll = document.getElementById('show-all-items').checked;
+    localStorage.setItem('show-all-items', showAll);
+    
+    // Reload items with new preference
+    loadItems();
     
     alert('Settings saved!');
 }

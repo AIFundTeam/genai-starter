@@ -14,13 +14,12 @@ A Claude Code-optimized template for rapidly building full-stack web application
 ## Tech Stack
 
 - 🤖 **LLM Integration** - OpenAI API integration built-in
-- 🔐 **Password Authentication** - Simple email/password login
+- 👤 **Simple User System** - Email-based login (no passwords)
 - 🚀 **Edge Functions** - Serverless backend with Deno
 - 🗄️ **PostgreSQL Database** - With Row Level Security via Supabase
 - 🌐 **Global CDN Hosting** - Via Cloudflare Pages
 - 📱 **Responsive Design** - Mobile-friendly out of the box
 - 🔄 **Realtime Updates** - Live data synchronization
-- 🛡️ **Security First** - RLS policies and secure authentication
 - 🎨 **No Build Process** - Pure HTML/JS/CSS for simplicity
 
 ## Prerequisites
@@ -33,82 +32,92 @@ A Claude Code-optimized template for rapidly building full-stack web application
 - [Node.js](https://nodejs.org) (for Cloudflare Wrangler)
 - Git
 
-## Quick Start with Claude Code
+## Quick Start
 
-### 1. Clone and Open with Claude Code
+### 1. Clone Repository
 
 ```bash
 git clone <your-repo-url>
 cd <your-project>
-
-# Open with Claude Code to start building
-claude .
 ```
 
-Claude Code will help you:
-- Understand the project structure instantly
-- Customize the template for your specific needs
-- Build features with AI assistance
-- Deploy your app when ready
+### 2. Create Supabase Project
 
-### 2. Setup Environment
+1. Go to [app.supabase.com](https://app.supabase.com) and create a new project
+   - **IMPORTANT**: Save your database password when shown! It's only displayed once.
+
+2. Get your access token for deployments:
+   - Go to [app.supabase.com/account/tokens](https://app.supabase.com/account/tokens)
+   - Generate a new token
+
+### 3. Create Cloudflare Pages Project
+
+1. Go to [dash.cloudflare.com](https://dash.cloudflare.com) → Pages
+2. Create a new Pages project (name it something like "your-app-name")
+3. Skip the git integration for now
+
+### 4. Setup Environment
 
 ```bash
-# In Claude Code, ask:
-# "Help me set up the environment variables"
-
-# Or manually:
 cp setup-env.sh.template setup-env.sh
 ```
 
-Edit `setup-env.sh` and add your credentials:
-- **Supabase**: Project ref, API keys, database password
-- **Cloudflare**: Account ID, API token, project name
-- **OpenAI**: API key from [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
+Edit `setup-env.sh` and fill in all the values at the top of the file:
 
-The setup script will automatically configure your OpenAI API key as a Supabase Edge Function secret.
+**Supabase Values** (from your Supabase project):
+- `SUPABASE_PROJECT_REF` - Settings → General (e.g., "xyzcompanyorxyz")
+- `SUPABASE_ANON_KEY` - Settings → API → anon public
+- `SUPABASE_SERVICE_ROLE_KEY` - Settings → API → service_role
+- `SUPABASE_DB_PASSWORD` - The password you saved when creating the project
+- `SUPABASE_ACCESS_TOKEN` - The token you just created
 
-### 3. Configure Supabase
+**Cloudflare Values**:
+- `CLOUDFLARE_ACCOUNT_ID` - Found in dashboard right sidebar
+- `CLOUDFLARE_API_TOKEN` - My Profile → API Tokens → Create Token
+  - Use "Edit Cloudflare Workers" template
+  - Add permission: Account:Cloudflare Pages:Edit
+- `CLOUDFLARE_PROJECT_NAME` - The name of your Pages project
 
-1. Create a new Supabase project at [app.supabase.com](https://app.supabase.com)
-   - **IMPORTANT**: Save your database password when shown! It's only displayed once.
-2. Go to Settings → API and copy:
-   - Project Ref → `SUPABASE_PROJECT_REF` (e.g., `xyzcompanyorxyz`)
-   - Anon Public key → `SUPABASE_ANON_KEY`
-   - Service Role key → `SUPABASE_SERVICE_ROLE_KEY` (keep secret!)
-3. Go to Settings → Database and copy:
-   - Database Password → `SUPABASE_DB_PASSWORD` (the one you saved from step 1)
-4. If you need an access token for deployments:
-   - Go to [app.supabase.com/account/tokens](https://app.supabase.com/account/tokens)
-   - Generate a new token → `SUPABASE_ACCESS_TOKEN`
+**OpenAI Values**:
+- `OPENAI_API_KEY` - Get from [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
 
-5. Edit `setup-env.sh` and add your Supabase credentials
-
-6. Source the environment to set up your project:
-   ```bash
-   source setup-env.sh dev
-   ```
-   
-   This will:
-   - Set all environment variables
-   - Link your Supabase project
-   - Generate `frontend/env.js` for local development
-
-### 5. Test Your Setup
-
-Before building your custom app, verify everything is working:
+### 5. Source Environment
 
 ```bash
-# Make sure you've completed all previous steps and can access the app
-open http://localhost:8000  # Or your deployed URL
+source setup-env.sh
 ```
+
+This will:
+- Set all environment variables
+- Link your Supabase project
+- Generate `frontend/env.js` for deployment
+
+### 6. Setup Database
+
+```bash
+# Run the database setup (WARNING: drops existing tables!)
+./setup_database.sh
+```
+
+**Important**: This script is idempotent but destructive - it drops and recreates all tables each time it runs. This ensures a clean state but will DELETE ALL DATA.
+
+### 7. Deploy
+
+```bash
+./deploy_backend.sh      # Deploy Supabase Edge Functions
+./deploy_frontend.sh     # Deploy to Cloudflare Pages
+```
+
+### 8. Test Your Setup
+
+After deploying, verify everything is working by visiting your Cloudflare Pages URL.
 
 The template includes a **Test Your Setup** section on the dashboard that verifies:
 
-1. ✅ **Authentication** - Shows your logged-in email
+1. ✅ **Frontend** - Confirms deployment is working
 2. ✅ **Database** - Tests connection to PostgreSQL  
-3. ✅ **Edge Functions** - Tests both public and protected APIs
-4. ✅ **LLM Integration** - Tests OpenAI API integration (requires API key)
+3. ✅ **Edge Functions** - Tests both public and user APIs
+4. ✅ **LLM Integration** - Tests OpenAI API integration
 
 The LLM test verifies your OpenAI API key is working. If it fails:
 1. Check your API key is valid and has credits
@@ -117,83 +126,31 @@ The LLM test verifies your OpenAI API key is working. If it fails:
 
 Once all tests pass, you'll see "🎉 All Tests Passed!" and you're ready to build.
 
-### 6. Build Your App with Claude Code
+## Build Your App with Claude Code
 
-This is where Claude Code shines! Before setting up the database, customize the template:
+Now that everything is set up and tested, open the project with Claude Code:
 
 ```bash
-# Examples of what to ask Claude Code:
-
-# "I want to build a task management app - update the schema and create the UI"
-# "Add a user profile page with avatar upload"
-# "Create an admin dashboard with user management"
-# "Implement real-time notifications"
-# "Add Stripe payment integration"
+claude .
 ```
+
+Examples of what to ask Claude Code:
+- "I want to build a task management app"
+- "Add a user profile system"
+- "Create a real-time chat feature"
+- "Implement file uploads"
+- "Add data export functionality"
 
 Claude Code will:
 - Update the database schema in `sql/schema.sql`
-- Create new pages and components
+- Modify the frontend UI in `index.html` and `index.js`
 - Add edge functions for your business logic
 - Implement features across the entire stack
 - Maintain consistency with the existing codebase
 
-### 7. Setup Database
-
-```bash
-# Make sure you've sourced your environment first
-source setup-env.sh dev
-
-# Run the database setup (WARNING: drops existing tables!)
-./setup_database.sh
-```
-
-**Important**: This script is idempotent but destructive - it drops and recreates all tables each time it runs. This ensures a clean state but will DELETE ALL DATA. Perfect for development, but don't run on production data!
-
-### 8. Configure Cloudflare
-
-1. Create a Cloudflare Pages project
-2. Get your Cloudflare credentials:
-   - Account ID: Found in Cloudflare dashboard sidebar
-   - API Token: Create at Cloudflare → My Profile → API Tokens
-     - Use "Edit Cloudflare Workers" template
-     - Add Account:Cloudflare Pages:Edit permission
-
-3. Add to `setup-env.sh`:
-   - `CLOUDFLARE_ACCOUNT_ID`
-   - `CLOUDFLARE_API_TOKEN`
-   - `CLOUDFLARE_PROJECT_NAME` (your Pages project name)
-
-### 9. Deploy with Claude Code
-
-```bash
-# Ask Claude Code to deploy:
-# "Deploy the backend to Supabase"
-# "Deploy the frontend to Cloudflare"
-
-# Or run manually:
-source setup-env.sh dev  # or 'prod' for production
-./deploy_backend.sh      # Deploy backend (Supabase Edge Functions)
-./deploy_frontend.sh     # Deploy frontend (Cloudflare Pages)
-```
-
-**Note**: The first time you deploy, Supabase CLI will link your project. This is a one-time setup per environment.
+**Important**: After Claude Code modifies the schema, run `./setup_database.sh` again to apply the changes.
 
 ## Development with Claude Code
-
-### Local Development Setup
-
-After running `source setup-env.sh dev`, your `frontend/env.js` is automatically created.
-
-Start a local server:
-
-```bash
-cd frontend
-python -m http.server 8000
-# Visit http://localhost:8000
-```
-
-### AI-Assisted Development
 
 Claude Code is your AI pair programmer. Here are some examples:
 
@@ -241,10 +198,10 @@ curl https://<project-ref>.supabase.co/functions/v1/protected-endpoint \
 
 ```
 ├── frontend/               # Frontend application
-│   ├── index.html         # Landing page
-│   ├── app.html           # Main app (authenticated)
-│   ├── login.html         # Login page
-│   ├── auth.js            # Auth utilities
+│   ├── login.html         # Email entry page
+│   ├── index.html         # Main application
+│   ├── index.js           # App logic
+│   ├── user.js            # User management
 │   ├── supabase.js        # Database client
 │   └── style.css          # Styles
 ├── supabase/functions/    # Edge functions
@@ -283,17 +240,10 @@ Claude Code will handle:
 
 ## Environment Management
 
-The template supports multiple environments:
-
-```bash
-# Development
-source setup-env.sh dev
-
-# Production
-source setup-env.sh prod
-```
-
-Configure different Supabase projects for each environment in `setup-env.sh`.
+For multiple environments (dev/staging/prod), create separate copies of `setup-env.sh` with different values:
+- `setup-env-dev.sh`
+- `setup-env-staging.sh`
+- `setup-env-prod.sh`
 
 ## Security Best Practices
 

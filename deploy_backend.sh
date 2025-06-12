@@ -11,9 +11,9 @@ NC='\033[0m' # No Color
 echo -e "${GREEN}=== Supabase Edge Functions Deployment ===${NC}"
 
 # Check if environment variables are set
-if [ -z "$SUPABASE_PROJECT_REF" ] || [ -z "$SUPABASE_ACCESS_TOKEN" ]; then
+if [ -z "$SUPABASE_PROJECT_REF" ] || [ -z "$SUPABASE_ACCESS_TOKEN" ] || [ -z "$OPENAI_API_KEY" ]; then
     echo -e "${RED}Error: Environment variables not set!${NC}"
-    echo "Please run: source setup-env.sh <environment>"
+    echo "Please run: source setup-env.sh"
     exit 1
 fi
 
@@ -34,6 +34,17 @@ if [ ! -f "supabase/.temp/project-ref" ] || [ "$(cat supabase/.temp/project-ref 
     supabase link --project-ref "$SUPABASE_PROJECT_REF" --password "$SUPABASE_DB_PASSWORD"
 else
     echo -e "${GREEN}Already linked to project: $SUPABASE_PROJECT_REF${NC}"
+fi
+
+# Set OpenAI API key as a secret
+echo -e "\n${GREEN}Setting Edge Function secrets...${NC}"
+echo -e "${YELLOW}Setting OPENAI_API_KEY...${NC}"
+supabase secrets set OPENAI_API_KEY="$OPENAI_API_KEY" --project-ref "$SUPABASE_PROJECT_REF" 2>&1 | grep -v "would you like to" || true
+
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}✓ OPENAI_API_KEY set successfully${NC}"
+else
+    echo -e "${YELLOW}⚠ OPENAI_API_KEY may already be set or there was an error${NC}"
 fi
 
 # Deploy all edge functions

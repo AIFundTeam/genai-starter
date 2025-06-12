@@ -74,15 +74,16 @@ header nav {
     gap: 1rem;
 }
 
-#user-info {
+.user-info {
     display: flex;
     align-items: center;
     gap: 1rem;
-}
-
-#user-email {
     color: var(--text-secondary);
     font-size: 0.875rem;
+}
+
+.user-info strong {
+    color: var(--text-primary);
 }
 
 .role-badge {

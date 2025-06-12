@@ -7,64 +7,38 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Drop existing objects to ensure clean state
 DROP TABLE IF EXISTS items CASCADE;
-DROP TABLE IF EXISTS user_roles CASCADE;
 DROP FUNCTION IF EXISTS update_updated_at_column() CASCADE;
-DROP FUNCTION IF EXISTS handle_new_user() CASCADE;
 
--- User roles table
-CREATE TABLE user_roles (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin')),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()),
-    UNIQUE(user_id)
-);
-
--- Example items table
+-- Items table (no authentication required)
 CREATE TABLE items (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    user_email TEXT NOT NULL,
     name TEXT NOT NULL,
     description TEXT,
-    is_deleted BOOLEAN DEFAULT FALSE,
+    is_complete BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
 );
 
 -- Create indexes for better performance
-CREATE INDEX idx_user_roles_user_id ON user_roles(user_id);
-CREATE INDEX idx_items_user_id ON items(user_id);
+CREATE INDEX idx_items_user_email ON items(user_email);
 CREATE INDEX idx_items_created_at ON items(created_at DESC);
 
--- Enable Row Level Security
-ALTER TABLE user_roles ENABLE ROW LEVEL SECURITY;
+-- Enable Row Level Security (but allow all operations)
 ALTER TABLE items ENABLE ROW LEVEL SECURITY;
 
--- RLS Policies for user_roles
-CREATE POLICY "Users can view own role" ON user_roles
-    FOR SELECT USING (auth.uid() = user_id);
+-- RLS Policies for items (allow all operations since no auth)
+CREATE POLICY "Anyone can view items" ON items
+    FOR SELECT USING (true);
 
-CREATE POLICY "Only admins can update roles" ON user_roles
-    FOR UPDATE USING (
-        EXISTS (
-            SELECT 1 FROM user_roles
-            WHERE user_id = auth.uid() AND role = 'admin'
-        )
-    );
+CREATE POLICY "Anyone can create items" ON items
+    FOR INSERT WITH CHECK (true);
 
--- RLS Policies for items
-CREATE POLICY "Users can view own items" ON items
-    FOR SELECT USING (auth.uid() = user_id AND NOT is_deleted);
+CREATE POLICY "Anyone can update items" ON items
+    FOR UPDATE USING (true);
 
-CREATE POLICY "Users can create own items" ON items
-    FOR INSERT WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can update own items" ON items
-    FOR UPDATE USING (auth.uid() = user_id AND NOT is_deleted);
-
-CREATE POLICY "Users can delete own items" ON items
-    FOR DELETE USING (auth.uid() = user_id);
+CREATE POLICY "Anyone can delete items" ON items
+    FOR DELETE USING (true);
 
 -- Function to automatically set updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -75,38 +49,15 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
--- Create triggers for updated_at
-CREATE TRIGGER update_user_roles_updated_at BEFORE UPDATE ON user_roles
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
+-- Create trigger for updated_at
 CREATE TRIGGER update_items_updated_at BEFORE UPDATE ON items
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- Function to automatically create user role on signup
-CREATE OR REPLACE FUNCTION handle_new_user()
-RETURNS TRIGGER AS $$
-BEGIN
-    INSERT INTO public.user_roles (user_id, role)
-    VALUES (NEW.id, 'user');
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- Trigger to create user role on signup
-CREATE TRIGGER on_auth_user_created
-    AFTER INSERT ON auth.users
-    FOR EACH ROW EXECUTE FUNCTION handle_new_user();
-
--- Enable realtime for tables
+-- Enable realtime for items table
 ALTER PUBLICATION supabase_realtime ADD TABLE items;
-ALTER PUBLICATION supabase_realtime ADD TABLE user_roles;
 
 -- Grant necessary permissions
 GRANT USAGE ON SCHEMA public TO anon, authenticated;
 GRANT ALL ON ALL TABLES IN SCHEMA public TO anon, authenticated;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated;
 GRANT ALL ON ALL FUNCTIONS IN SCHEMA public TO anon, authenticated;
-
--- Sample data (optional - remove in production)
--- INSERT INTO items (user_id, name, description) VALUES 
--- ('00000000-0000-0000-0000-000000000000', 'Sample Item', 'This is a sample item');

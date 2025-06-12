@@ -50,28 +50,23 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     exit 0
 fi
 
-# Reset local migrations to match remote (this makes it idempotent)
-echo "Resetting migration state..."
+# Reset migrations directory
+echo "Preparing migrations..."
 rm -rf supabase/migrations
 mkdir -p supabase/migrations
 
-# Pull current remote state to sync
-echo "Syncing with remote database..."
-supabase db pull --password "$SUPABASE_DB_PASSWORD" 2>&1 | grep -v "Schema public was not modified" || true
-
-# Now create our new migration
+# Create our schema migration
 TIMESTAMP=$(date +%Y%m%d%H%M%S)
-MIGRATION_FILE="supabase/migrations/${TIMESTAMP}_reset_schema.sql"
+MIGRATION_FILE="supabase/migrations/${TIMESTAMP}_initial_schema.sql"
 cp sql/schema.sql "$MIGRATION_FILE"
 
-echo "Applying schema to database..."
-
-# Push the migration
-supabase db push --password "$SUPABASE_DB_PASSWORD"
+# Reset the remote database and apply our migration
+echo "Resetting remote database..."
+PGPASSWORD="$SUPABASE_DB_PASSWORD" supabase db reset --linked --no-seed
 
 if [ $? -eq 0 ]; then
     echo ""
-    echo "✅ Database schema setup complete!"
+    echo "✅ Database reset complete!"
     echo ""
     echo "Tables created:"
     echo "  - user_roles (for user permissions)"
@@ -90,3 +85,4 @@ else
     echo "Please check the error messages above"
     exit 1
 fi
+

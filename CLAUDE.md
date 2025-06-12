@@ -9,7 +9,7 @@ This is a full-stack web application template built with:
 - **Backend**: Supabase Edge Functions (Deno runtime)
 - **Database**: PostgreSQL via Supabase
 - **Hosting**: Cloudflare Pages (frontend), Supabase (backend)
-- **Authentication**: Password-based authentication (no email verification)
+- **Users**: Simple username-based system (no authentication)
 - **AI/LLM**: OpenAI API integration (required)
 
 ## Key Commands
@@ -18,7 +18,7 @@ This is a full-stack web application template built with:
 # Initial setup (run once)
 cp setup-env.sh.template setup-env.sh
 # Edit setup-env.sh with your Supabase and Cloudflare credentials
-source setup-env.sh dev  # or prod
+source setup-env.sh
 
 # Database setup (run once)
 # Execute sql/schema.sql content in Supabase SQL editor
@@ -29,11 +29,7 @@ source setup-env.sh dev  # or prod
 # Deploy frontend (Cloudflare Pages)
 ./deploy_frontend.sh
 
-# Local development
-# Frontend: Open frontend/index.html in browser or use a local server
-# Backend: Test edge functions via Supabase dashboard or curl
-
-# Deploy specific function (for testing)
+# Deploy specific function
 supabase functions deploy <function-name> --project-ref $SUPABASE_PROJECT_REF
 ```
 
@@ -68,14 +64,14 @@ template/
 
 ### Page Structure
 
-**Simple two-page architecture:**
-- `index.html` - The MAIN APPLICATION (requires authentication)
-- `login.html` - The authentication page
+**Single page application:**
+- `index.html` - The MAIN APPLICATION
+- No login required - users just enter their name
 
-**Authentication Flow:**
-1. User visits site → redirected to `login.html` if not authenticated
-2. User logs in → redirected to `index.html` (main app)
-3. All app functionality lives in `index.html`
+**User Flow:**
+1. User visits site → prompted for username
+2. Username stored in localStorage
+3. All data is associated with username
 
 **When users ask you to build features:**
 - ✅ ALWAYS modify `index.html` and `index.js` for app functionality
@@ -85,9 +81,9 @@ template/
 
 **Test Setup Flow:**
 The template includes a comprehensive test section in the dashboard to verify:
-1. Authentication is working (user email displayed)
+1. Frontend deployment is working
 2. Database connection (tests items table access)
-3. Edge functions (both public and protected endpoints)
+3. Edge functions (both public and user endpoints)
 4. LLM integration (tests OpenAI API connection)
 
 All tests must pass before building custom features. The OpenAI API key is automatically configured from setup-env.sh.
@@ -110,12 +106,12 @@ window.SUPABASE_ANON_KEY = 'eyJ...';
 
 ### Key Patterns
 
-1. **Authentication Flow**
-   - User enters email and password on login page
-   - Can toggle between sign in and sign up modes
-   - Password-based authentication (no email verification)
-   - Session stored in localStorage
-   - Auth state changes trigger navigation
+1. **User Management**
+   - User enters username when first visiting
+   - Username stored in localStorage
+   - Can change username anytime
+   - No passwords or authentication required
+   - All data associated with username
 
 2. **Frontend Patterns**
    - Modular JavaScript with clear separation of concerns
@@ -134,8 +130,8 @@ window.SUPABASE_ANON_KEY = 'eyJ...';
 4. **Database Patterns**
    - UUID primary keys
    - Row Level Security (RLS) policies
-   - Audit fields (created_at, updated_at, created_by)
-   - User roles (user, admin)
+   - Audit fields (created_at, updated_at)
+   - Username field for data ownership
    - Soft delete pattern where appropriate
    - **Idempotent schema**: setup_database.sh drops and recreates tables
 
@@ -261,13 +257,13 @@ window.SUPABASE_ANON_KEY = 'eyJ...';
 
 5. **Add RLS Policy**
    ```sql
-   CREATE POLICY "Users can view own items" ON items
-     FOR SELECT USING (auth.uid() = user_id);
+   CREATE POLICY "Anyone can view items" ON items
+     FOR SELECT USING (true);
    ```
 
 ### Testing
 
-- Frontend: Use browser developer tools and console
+- Frontend: Use browser developer tools on deployed site
 - Backend: Test via Supabase dashboard or curl commands
 - Database: Use Supabase SQL editor for queries
 - Authentication: Create test users via sign up form or Supabase dashboard
@@ -275,14 +271,14 @@ window.SUPABASE_ANON_KEY = 'eyJ...';
 
 ### Deployment
 
-1. Always run `source setup-env.sh <env>` before deploying
+1. Always run `source setup-env.sh` before deploying
 2. Deploy backend first with `./deploy_backend.sh`
 3. Deploy frontend with `./deploy_frontend.sh`
 4. Monitor logs in Supabase and Cloudflare dashboards
 
 ### Troubleshooting
 
-- **Auth issues**: Check user credentials and Supabase Auth settings
+- **User issues**: Check localStorage and username storage
 - **CORS errors**: Verify frontend URL in CORS configuration
 - **Database errors**: Check RLS policies and user permissions
 - **Function errors**: View logs in Supabase dashboard

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In - App Template</title>
+    <title>Welcome - App Template</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -21,10 +21,10 @@
     <main class="container">
         <div class="auth-container">
             <div class="auth-card">
-                <h2 id="auth-title">Sign In</h2>
-                <p id="auth-subtitle">Enter your email and password</p>
+                <h2>Welcome!</h2>
+                <p>Enter your email to get started</p>
                 
-                <form id="auth-form">
+                <form id="login-form">
                     <div class="form-group">
                         <label for="email">Email Address</label>
                         <input 
@@ -37,28 +37,13 @@
                         >
                     </div>
                     
-                    <div class="form-group">
-                        <label for="password">Password</label>
-                        <input 
-                            type="password" 
-                            id="password" 
-                            name="password" 
-                            placeholder="••••••••"
-                            required
-                            minlength="6"
-                        >
-                    </div>
-                    
-                    <button type="submit" class="btn btn-primary btn-block" id="submit-btn">
-                        Sign In
+                    <button type="submit" class="btn btn-primary btn-block">
+                        Continue
                     </button>
                 </form>
                 
                 <div class="auth-footer">
-                    <p id="auth-switch">
-                        Don't have an account? 
-                        <a href="#" onclick="toggleAuthMode(event)">Sign up</a>
-                    </p>
+                    <p>No password required - just enter your email to start using the app!</p>
                 </div>
             </div>
         </div>
@@ -72,34 +57,25 @@
     </footer>
 
     <!-- Scripts -->
-    <script src="env.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase.js"></script>
-    <script src="auth.js"></script>
     <script>
-        let isSignUp = false;
-        
-        function toggleAuthMode(e) {
-            e.preventDefault();
-            isSignUp = !isSignUp;
-            
-            const title = document.getElementById('auth-title');
-            const subtitle = document.getElementById('auth-subtitle');
-            const submitBtn = document.getElementById('submit-btn');
-            const authSwitch = document.getElementById('auth-switch');
-            
-            if (isSignUp) {
-                title.textContent = 'Sign Up';
-                subtitle.textContent = 'Create a new account';
-                submitBtn.textContent = 'Sign Up';
-                authSwitch.innerHTML = 'Already have an account? <a href="#" onclick="toggleAuthMode(event)">Sign in</a>';
-            } else {
-                title.textContent = 'Sign In';
-                subtitle.textContent = 'Enter your email and password';
-                submitBtn.textContent = 'Sign In';
-                authSwitch.innerHTML = 'Don\'t have an account? <a href="#" onclick="toggleAuthMode(event)">Sign up</a>';
-            }
+        // Check if user is already logged in
+        const savedEmail = localStorage.getItem('userEmail');
+        if (savedEmail) {
+            window.location.href = 'index.html';
         }
+
+        // Handle form submission
+        document.getElementById('login-form').onsubmit = function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            if (email) {
+                // Save email to localStorage
+                localStorage.setItem('userEmail', email);
+                // Redirect to main app
+                window.location.href = 'index.html';
+            }
+        };
     </script>
 </body>
 </html>
