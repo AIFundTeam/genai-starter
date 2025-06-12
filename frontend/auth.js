@@ -124,42 +124,65 @@ function setupEventListeners() {
         };
     }
 
-    // Login form
-    const loginForm = document.getElementById('login-form');
-    if (loginForm) {
-        loginForm.onsubmit = async (e) => {
+    // Auth form (handles both login and signup)
+    const authForm = document.getElementById('auth-form');
+    if (authForm) {
+        authForm.onsubmit = async (e) => {
             e.preventDefault();
             
             const email = document.getElementById('email').value;
-            const submitBtn = loginForm.querySelector('button[type="submit"]');
+            const password = document.getElementById('password').value;
+            const submitBtn = authForm.querySelector('button[type="submit"]');
             
-            if (!email) {
-                alert('Please enter your email');
+            if (!email || !password) {
+                alert('Please enter both email and password');
                 return;
             }
             
             // Disable button and show loading state
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Sending...';
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Loading...';
             
             try {
-                const { error } = await supabaseClient.auth.signInWithOtp({
-                    email,
-                    options: {
-                        emailRedirectTo: `${window.location.origin}/index.html`
+                let result;
+                
+                // Check if we're in sign up or sign in mode
+                if (window.isSignUp) {
+                    // Sign up new user
+                    result = await supabaseClient.auth.signUp({
+                        email,
+                        password,
+                        options: {
+                            emailRedirectTo: null // No email confirmation needed
+                        }
+                    });
+                    
+                    if (result.error) throw result.error;
+                    
+                    // Auto sign in after signup
+                    if (result.data.user) {
+                        console.log('User created successfully, signing in...');
                     }
-                });
+                } else {
+                    // Sign in existing user
+                    result = await supabaseClient.auth.signInWithPassword({
+                        email,
+                        password
+                    });
+                    
+                    if (result.error) throw result.error;
+                }
                 
-                if (error) throw error;
+                // Success - auth state change will handle redirect
+                console.log('Authentication successful');
                 
-                alert(`Magic link sent to ${email}! Check your inbox.`);
-                loginForm.reset();
             } catch (error) {
-                console.error('Error sending magic link:', error);
+                console.error('Error during authentication:', error);
                 alert(`Error: ${error.message}`);
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Send Magic Link';
+                submitBtn.textContent = originalText;
             }
         };
     }

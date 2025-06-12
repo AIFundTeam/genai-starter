@@ -45,6 +45,16 @@ export SUPABASE_URL="https://${SUPABASE_PROJECT_REF}.supabase.co"
 export CLOUDFLARE_ACCOUNT_ID="YOUR_CLOUDFLARE_ACCOUNT_ID"
 export CLOUDFLARE_API_TOKEN="YOUR_CLOUDFLARE_API_TOKEN"
 
+# === OPENAI CONFIGURATION ===
+# Required for LLM features - get from https://platform.openai.com/api-keys
+# This template is opinionated: AI features are a core part of modern apps!
+
+if [ "$ENVIRONMENT" = "prod" ]; then
+    export OPENAI_API_KEY="YOUR_PROD_OPENAI_API_KEY"  # sk-...
+else
+    export OPENAI_API_KEY="YOUR_DEV_OPENAI_API_KEY"   # sk-...
+fi
+
 # === OPTIONAL: OTHER API KEYS ===
 # Add any other service API keys here
 # export STRIPE_API_KEY="sk_test_..."
@@ -59,6 +69,7 @@ REQUIRED_VARS=(
     "CLOUDFLARE_ACCOUNT_ID"
     "CLOUDFLARE_API_TOKEN"
     "CLOUDFLARE_PROJECT_NAME"
+    "OPENAI_API_KEY"
 )
 
 ALL_SET=true
@@ -81,6 +92,7 @@ if [ "$ALL_SET" = true ]; then
     echo "Cloudflare Project: $CLOUDFLARE_PROJECT_NAME"
     echo ""
     echo "You can now run:"
+    echo "  ./setup_database.sh  - Set up your database schema"
     echo "  ./deploy_backend.sh  - Deploy Supabase Edge Functions"
     echo "  ./deploy_frontend.sh - Deploy to Cloudflare Pages"
 else
@@ -95,6 +107,9 @@ else
     echo "Get Cloudflare values from:"
     echo "  Account ID: Cloudflare dashboard sidebar"
     echo "  API Token: https://dash.cloudflare.com/profile/api-tokens"
+    echo ""
+    echo "Get OpenAI API key from:"
+    echo "  https://platform.openai.com/api-keys"
 fi
 
 # Export environment name for scripts
@@ -120,4 +135,19 @@ window.SUPABASE_ANON_KEY = '${SUPABASE_ANON_KEY}';
 window.ENVIRONMENT = '${ENVIRONMENT}';
 EOF
     echo "✅ frontend/env.js created"
+    
+    # Set Supabase Edge Function secrets
+    echo ""
+    echo "Setting Edge Function secrets..."
+    
+    # Set OpenAI API key
+    supabase secrets set OPENAI_API_KEY="$OPENAI_API_KEY" --project-ref "$SUPABASE_PROJECT_REF" 2>&1 | grep -v "would you like to" || true
+    
+    if [ $? -eq 0 ]; then
+        echo "✅ OPENAI_API_KEY set in Edge Function secrets"
+        echo "   Note: Deploy your functions to apply the secret"
+    else
+        echo "⚠️  Could not set OPENAI_API_KEY automatically"
+        echo "   You can set it manually in the Supabase dashboard"
+    fi
 fi

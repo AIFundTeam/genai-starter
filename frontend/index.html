@@ -52,16 +52,52 @@
                         </div>
                     </div>
                     
-                    <div class="actions">
-                        <button class="btn btn-primary" onclick="testPublicEndpoint()">
-                            Test Public Endpoint
-                        </button>
-                        <button class="btn btn-secondary" onclick="testProtectedEndpoint()">
-                            Test Protected Endpoint
-                        </button>
+                    <!-- Test Setup Section -->
+                    <div class="test-setup">
+                        <h3>🧪 Test Your Setup</h3>
+                        <p>Verify your full-stack configuration is working correctly:</p>
+                        
+                        <div class="test-grid">
+                            <div class="test-card">
+                                <h4>1. Authentication</h4>
+                                <p>✅ You're logged in as: <strong id="test-user-email"></strong></p>
+                            </div>
+                            
+                            <div class="test-card">
+                                <h4>2. Database</h4>
+                                <button class="btn btn-secondary" onclick="testDatabase()">
+                                    Test Database
+                                </button>
+                            </div>
+                            
+                            <div class="test-card">
+                                <h4>3. Edge Functions</h4>
+                                <button class="btn btn-secondary" onclick="testPublicEndpoint()">
+                                    Test Public API
+                                </button>
+                                <button class="btn btn-secondary" onclick="testProtectedEndpoint()">
+                                    Test Protected API
+                                </button>
+                            </div>
+                            
+                            <div class="test-card">
+                                <h4>4. LLM Integration</h4>
+                                <div class="llm-test">
+                                    <input type="text" id="llm-prompt" placeholder="Ask a question..." value="What is 2+2?">
+                                    <button class="btn btn-primary" onclick="testLLM()">
+                                        Test LLM API
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="test-results" class="test-results"></div>
+                        
+                        <div class="test-success" id="test-success" style="display: none;">
+                            <h4>🎉 All Tests Passed!</h4>
+                            <p>Your setup is working correctly. You can now ask Claude Code to build your custom app.</p>
+                        </div>
                     </div>
-                    
-                    <div id="test-results" class="test-results"></div>
                 </section>
 
                 <!-- Items Section -->
@@ -152,6 +188,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase.js"></script>
     <script src="auth.js"></script>
-    <script src="app.js"></script>
+    <script src="index.js"></script>
 </body>
 </html>

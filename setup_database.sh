@@ -50,17 +50,23 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     exit 0
 fi
 
-# Create migrations directory if it doesn't exist
+# Reset local migrations to match remote (this makes it idempotent)
+echo "Resetting migration state..."
+rm -rf supabase/migrations
 mkdir -p supabase/migrations
 
-# Copy our schema to migrations with a timestamp
+# Pull current remote state to sync
+echo "Syncing with remote database..."
+supabase db pull --password "$SUPABASE_DB_PASSWORD" 2>&1 | grep -v "Schema public was not modified" || true
+
+# Now create our new migration
 TIMESTAMP=$(date +%Y%m%d%H%M%S)
-MIGRATION_FILE="supabase/migrations/${TIMESTAMP}_schema.sql"
+MIGRATION_FILE="supabase/migrations/${TIMESTAMP}_reset_schema.sql"
 cp sql/schema.sql "$MIGRATION_FILE"
 
 echo "Applying schema to database..."
 
-# Push to remote database
+# Push the migration
 supabase db push --password "$SUPABASE_DB_PASSWORD"
 
 if [ $? -eq 0 ]; then
@@ -78,13 +84,9 @@ if [ $? -eq 0 ]; then
     echo ""
     echo "Note: This script is idempotent and can be run multiple times."
     echo "      Each run will drop and recreate all tables."
-    
-    # Clean up migration file after success
-    rm -f "$MIGRATION_FILE"
 else
     echo ""
     echo "❌ Database setup failed"
-    echo "Migration file left at: $MIGRATION_FILE"
-    echo "You can retry with: supabase db push --password \$SUPABASE_DB_PASSWORD"
+    echo "Please check the error messages above"
     exit 1
 fi

@@ -13,7 +13,8 @@ A Claude Code-optimized template for rapidly building full-stack web application
 
 ## Tech Stack
 
-- 🔐 **Magic Link Authentication** - Email-based passwordless login
+- 🤖 **LLM Integration** - OpenAI API integration built-in
+- 🔐 **Password Authentication** - Simple email/password login
 - 🚀 **Edge Functions** - Serverless backend with Deno
 - 🗄️ **PostgreSQL Database** - With Row Level Security via Supabase
 - 🌐 **Global CDN Hosting** - Via Cloudflare Pages
@@ -25,6 +26,7 @@ A Claude Code-optimized template for rapidly building full-stack web application
 ## Prerequisites
 
 - **[Claude Code](https://www.anthropic.com/claude-code)** - Your AI coding assistant (required)
+- [OpenAI Account](https://platform.openai.com) with API key (required)
 - [Supabase Account](https://supabase.com) (free tier works)
 - [Cloudflare Account](https://cloudflare.com) (free tier works)
 - [Supabase CLI](https://supabase.com/docs/guides/cli) installed
@@ -59,6 +61,13 @@ Claude Code will help you:
 cp setup-env.sh.template setup-env.sh
 ```
 
+Edit `setup-env.sh` and add your credentials:
+- **Supabase**: Project ref, API keys, database password
+- **Cloudflare**: Account ID, API token, project name
+- **OpenAI**: API key from [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
+
+The setup script will automatically configure your OpenAI API key as a Supabase Edge Function secret.
+
 ### 3. Configure Supabase
 
 1. Create a new Supabase project at [app.supabase.com](https://app.supabase.com)
@@ -85,7 +94,30 @@ cp setup-env.sh.template setup-env.sh
    - Link your Supabase project
    - Generate `frontend/env.js` for local development
 
-### 5. Build Your App with Claude Code
+### 5. Test Your Setup
+
+Before building your custom app, verify everything is working:
+
+```bash
+# Make sure you've completed all previous steps and can access the app
+open http://localhost:8000  # Or your deployed URL
+```
+
+The template includes a **Test Your Setup** section on the dashboard that verifies:
+
+1. ✅ **Authentication** - Shows your logged-in email
+2. ✅ **Database** - Tests connection to PostgreSQL  
+3. ✅ **Edge Functions** - Tests both public and protected APIs
+4. ✅ **LLM Integration** - Tests OpenAI API integration (requires API key)
+
+The LLM test verifies your OpenAI API key is working. If it fails:
+1. Check your API key is valid and has credits
+2. Make sure you ran `./deploy_backend.sh` after setting up
+3. Verify the secret was set: `supabase secrets list`
+
+Once all tests pass, you'll see "🎉 All Tests Passed!" and you're ready to build.
+
+### 6. Build Your App with Claude Code
 
 This is where Claude Code shines! Before setting up the database, customize the template:
 
@@ -106,7 +138,7 @@ Claude Code will:
 - Implement features across the entire stack
 - Maintain consistency with the existing codebase
 
-### 6. Setup Database
+### 7. Setup Database
 
 ```bash
 # Make sure you've sourced your environment first
@@ -117,12 +149,6 @@ source setup-env.sh dev
 ```
 
 **Important**: This script is idempotent but destructive - it drops and recreates all tables each time it runs. This ensures a clean state but will DELETE ALL DATA. Perfect for development, but don't run on production data!
-
-### 7. Configure Authentication
-
-1. Go to Supabase Dashboard → Authentication → Email Templates
-2. Update the magic link template if desired
-3. Configure allowed domains in Authentication → URL Configuration
 
 ### 8. Configure Cloudflare
 

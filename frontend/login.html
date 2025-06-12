@@ -14,9 +14,6 @@
                 <img src="logo.svg" alt="Logo" width="32" height="32">
                 <h1>App Template</h1>
             </div>
-            <nav>
-                <a href="index.html">Home</a>
-            </nav>
         </div>
     </header>
 
@@ -24,10 +21,10 @@
     <main class="container">
         <div class="auth-container">
             <div class="auth-card">
-                <h2>Sign In</h2>
-                <p>Enter your email to receive a magic link</p>
+                <h2 id="auth-title">Sign In</h2>
+                <p id="auth-subtitle">Enter your email and password</p>
                 
-                <form id="login-form">
+                <form id="auth-form">
                     <div class="form-group">
                         <label for="email">Email Address</label>
                         <input 
@@ -40,13 +37,28 @@
                         >
                     </div>
                     
-                    <button type="submit" class="btn btn-primary btn-block">
-                        Send Magic Link
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            placeholder="••••••••"
+                            required
+                            minlength="6"
+                        >
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-block" id="submit-btn">
+                        Sign In
                     </button>
                 </form>
                 
                 <div class="auth-footer">
-                    <p>We'll send you a secure link to sign in. No password needed!</p>
+                    <p id="auth-switch">
+                        Don't have an account? 
+                        <a href="#" onclick="toggleAuthMode(event)">Sign up</a>
+                    </p>
                 </div>
             </div>
         </div>
@@ -64,5 +76,30 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase.js"></script>
     <script src="auth.js"></script>
+    <script>
+        let isSignUp = false;
+        
+        function toggleAuthMode(e) {
+            e.preventDefault();
+            isSignUp = !isSignUp;
+            
+            const title = document.getElementById('auth-title');
+            const subtitle = document.getElementById('auth-subtitle');
+            const submitBtn = document.getElementById('submit-btn');
+            const authSwitch = document.getElementById('auth-switch');
+            
+            if (isSignUp) {
+                title.textContent = 'Sign Up';
+                subtitle.textContent = 'Create a new account';
+                submitBtn.textContent = 'Sign Up';
+                authSwitch.innerHTML = 'Already have an account? <a href="#" onclick="toggleAuthMode(event)">Sign in</a>';
+            } else {
+                title.textContent = 'Sign In';
+                subtitle.textContent = 'Enter your email and password';
+                submitBtn.textContent = 'Sign In';
+                authSwitch.innerHTML = 'Don\'t have an account? <a href="#" onclick="toggleAuthMode(event)">Sign up</a>';
+            }
+        }
+    </script>
 </body>
 </html>

@@ -9,7 +9,8 @@ This is a full-stack web application template built with:
 - **Backend**: Supabase Edge Functions (Deno runtime)
 - **Database**: PostgreSQL via Supabase
 - **Hosting**: Cloudflare Pages (frontend), Supabase (backend)
-- **Authentication**: Magic link email authentication
+- **Authentication**: Password-based authentication (no email verification)
+- **AI/LLM**: OpenAI API integration (required)
 
 ## Key Commands
 
@@ -82,6 +83,15 @@ template/
 - ✅ Create edge functions for backend logic
 - ❌ NEVER create app.html or other HTML files unless specifically requested
 
+**Test Setup Flow:**
+The template includes a comprehensive test section in the dashboard to verify:
+1. Authentication is working (user email displayed)
+2. Database connection (tests items table access)
+3. Edge functions (both public and protected endpoints)
+4. LLM integration (tests OpenAI API connection)
+
+All tests must pass before building custom features. The OpenAI API key is automatically configured from setup-env.sh.
+
 ### CRITICAL: The env.js File
 
 **IMPORTANT**: The app requires `env.js` to be present with Supabase configuration. This file is:
@@ -101,9 +111,9 @@ window.SUPABASE_ANON_KEY = 'eyJ...';
 ### Key Patterns
 
 1. **Authentication Flow**
-   - User enters email on login page
-   - Magic link sent via Supabase Auth
-   - User clicks link and is authenticated
+   - User enters email and password on login page
+   - Can toggle between sign in and sign up modes
+   - Password-based authentication (no email verification)
    - Session stored in localStorage
    - Auth state changes trigger navigation
 
@@ -178,6 +188,7 @@ window.SUPABASE_ANON_KEY = 'eyJ...';
    - Add to setup-env.sh.template
    - Document in README.md
    - Use in code via env.js (frontend) or Deno.env (backend)
+   - OpenAI API key is automatically set as Edge Function secret
 
 ### Common User Requests and How to Handle Them
 
@@ -193,19 +204,25 @@ window.SUPABASE_ANON_KEY = 'eyJ...';
    - Update index.html with profile UI
    - Create profile management edge functions
 
-3. **"Add file uploads"**
+3. **"Add AI features"**
+   - Use the existing OpenAI integration
+   - Create edge functions that call LLMs
+   - Add AI-powered UI to index.html
+   - Example: AI chat, content generation, analysis
+
+4. **"Add file uploads"**
    - Use Supabase Storage buckets
    - Create storage policies
    - Add upload UI to index.html
    - Handle file metadata in database
 
-4. **"Add payment processing"**
+5. **"Add payment processing"**
    - Integrate Stripe via edge functions
    - Add subscription/payment tables
    - Create checkout flow in index.html
    - Handle webhooks securely
 
-5. **"Make it real-time"**
+6. **"Make it real-time"**
    - Enable realtime on relevant tables
    - Add subscription handlers in index.js
    - Update UI reactively on changes
@@ -253,7 +270,8 @@ window.SUPABASE_ANON_KEY = 'eyJ...';
 - Frontend: Use browser developer tools and console
 - Backend: Test via Supabase dashboard or curl commands
 - Database: Use Supabase SQL editor for queries
-- Authentication: Create test users via Supabase dashboard
+- Authentication: Create test users via sign up form or Supabase dashboard
+- Full Stack: Use the built-in test suite on the dashboard to verify setup
 
 ### Deployment
 
@@ -264,7 +282,7 @@ window.SUPABASE_ANON_KEY = 'eyJ...';
 
 ### Troubleshooting
 
-- **Auth issues**: Check Supabase Auth settings and email templates
+- **Auth issues**: Check user credentials and Supabase Auth settings
 - **CORS errors**: Verify frontend URL in CORS configuration
 - **Database errors**: Check RLS policies and user permissions
 - **Function errors**: View logs in Supabase dashboard

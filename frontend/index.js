@@ -9,6 +9,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     console.log('App initialized for user:', user.email);
     
+    // Show user email in test section
+    document.getElementById('test-user-email').textContent = user.email;
+    
     // Set up navigation
     setupNavigation();
     
@@ -51,7 +54,7 @@ function setupNavigation() {
 async function loadDashboard() {
     try {
         // Load items count
-        const items = await window.supabaseClient.selectFrom('items', 'id', {
+        const items = await window.selectFrom('items', 'id', {
             user_id: window.getCurrentUser().id
         });
         document.getElementById('total-items').textContent = items.length;
@@ -73,25 +76,69 @@ async function loadDashboard() {
     }
 }
 
-// Test endpoint functions
-async function testPublicEndpoint() {
+// Test functions
+let testsPassed = {
+    database: false,
+    publicApi: false,
+    protectedApi: false,
+    llm: false
+};
+
+function checkAllTests() {
+    if (Object.values(testsPassed).every(v => v)) {
+        document.getElementById('test-success').style.display = 'block';
+    }
+}
+
+async function testDatabase() {
     const resultsDiv = document.getElementById('test-results');
-    resultsDiv.innerHTML = '<p>Testing public endpoint...</p>';
+    resultsDiv.innerHTML = '<p>⏳ Testing database connection...</p>';
     
     try {
-        const data = await window.supabaseClient.invokeEdgeFunction('hello-world', {
+        // Try to read from items table
+        const { data, error } = await supabaseClient
+            .from('items')
+            .select('id')
+            .limit(1);
+            
+        if (error) throw error;
+        
+        resultsDiv.innerHTML = `
+            <div class="alert alert-success">
+                <strong>✅ Database:</strong> Connected successfully!
+            </div>
+        `;
+        testsPassed.database = true;
+        checkAllTests();
+    } catch (error) {
+        resultsDiv.innerHTML = `
+            <div class="alert alert-error">
+                <strong>❌ Database Error:</strong> ${error.message}
+            </div>
+        `;
+    }
+}
+
+async function testPublicEndpoint() {
+    const resultsDiv = document.getElementById('test-results');
+    resultsDiv.innerHTML = '<p>⏳ Testing public API endpoint...</p>';
+    
+    try {
+        const data = await window.invokeEdgeFunction('hello-world', {
             name: window.getCurrentUser().email
         });
         
         resultsDiv.innerHTML = `
             <div class="alert alert-success">
-                <strong>Success!</strong> Response: ${JSON.stringify(data, null, 2)}
+                <strong>✅ Public API:</strong> ${data.message}
             </div>
         `;
+        testsPassed.publicApi = true;
+        checkAllTests();
     } catch (error) {
         resultsDiv.innerHTML = `
             <div class="alert alert-error">
-                <strong>Error:</strong> ${error.message}
+                <strong>❌ Public API Error:</strong> ${error.message}
             </div>
         `;
     }
@@ -99,20 +146,63 @@ async function testPublicEndpoint() {
 
 async function testProtectedEndpoint() {
     const resultsDiv = document.getElementById('test-results');
-    resultsDiv.innerHTML = '<p>Testing protected endpoint...</p>';
+    resultsDiv.innerHTML = '<p>⏳ Testing protected API endpoint...</p>';
     
     try {
-        const data = await window.supabaseClient.invokeEdgeFunction('protected-endpoint');
+        const data = await window.invokeEdgeFunction('protected-endpoint');
         
         resultsDiv.innerHTML = `
             <div class="alert alert-success">
-                <strong>Success!</strong> Response: ${JSON.stringify(data, null, 2)}
+                <strong>✅ Protected API:</strong> Authenticated as ${data.user}
             </div>
         `;
+        testsPassed.protectedApi = true;
+        checkAllTests();
     } catch (error) {
         resultsDiv.innerHTML = `
             <div class="alert alert-error">
-                <strong>Error:</strong> ${error.message}
+                <strong>❌ Protected API Error:</strong> ${error.message}
+            </div>
+        `;
+    }
+}
+
+async function testLLM() {
+    const resultsDiv = document.getElementById('test-results');
+    const promptInput = document.getElementById('llm-prompt');
+    const prompt = promptInput.value.trim();
+    
+    if (!prompt) {
+        resultsDiv.innerHTML = `
+            <div class="alert alert-error">
+                <strong>Error:</strong> Please enter a prompt
+            </div>
+        `;
+        return;
+    }
+    
+    resultsDiv.innerHTML = '<p>⏳ Testing LLM integration...</p>';
+    
+    try {
+        const data = await window.invokeEdgeFunction('test-llm', { prompt });
+        
+        if (data.error) {
+            throw new Error(data.message || data.error);
+        }
+        
+        resultsDiv.innerHTML = `
+            <div class="alert alert-success">
+                <strong>✅ LLM API:</strong> ${data.response}
+                <br><small>Response from OpenAI GPT-3.5</small>
+            </div>
+        `;
+        testsPassed.llm = true;
+        checkAllTests();
+    } catch (error) {
+        resultsDiv.innerHTML = `
+            <div class="alert alert-error">
+                <strong>❌ LLM Error:</strong> ${error.message}
+                <br><small>Make sure OPENAI_API_KEY is set in Supabase Edge Function secrets</small>
             </div>
         `;
     }
@@ -121,7 +211,7 @@ async function testProtectedEndpoint() {
 // Items functions
 async function loadItems() {
     try {
-        const items = await window.supabaseClient.selectFrom('items', '*', {
+        const items = await window.selectFrom('items', '*', {
             user_id: window.getCurrentUser().id
         });
         
@@ -158,7 +248,7 @@ function renderItems(items) {
 
 // Subscribe to realtime updates
 function subscribeToItems() {
-    itemsChannel = window.supabaseClient.subscribeToTable('items', (payload) => {
+    itemsChannel = window.subscribeToTable('items', (payload) => {
         console.log('Items changed:', payload);
         
         // Reload items on any change
@@ -189,7 +279,7 @@ async function handleAddItem(event) {
     const description = document.getElementById('item-description').value;
     
     try {
-        await window.supabaseClient.insertInto('items', {
+        await window.insertInto('items', {
             name,
             description,
             user_id: window.getCurrentUser().id
@@ -212,7 +302,7 @@ async function deleteItem(id) {
     if (!confirm('Are you sure you want to delete this item?')) return;
     
     try {
-        await window.supabaseClient.deleteFrom('items', id);
+        await window.deleteFrom('items', id);
     } catch (error) {
         console.error('Error deleting item:', error);
         alert('Error deleting item. Please try again.');
@@ -242,6 +332,6 @@ function saveSettings() {
 // Cleanup on page unload
 window.addEventListener('beforeunload', () => {
     if (itemsChannel) {
-        window.supabaseClient.unsubscribe(itemsChannel);
+        supabaseClient.removeChannel(itemsChannel);
     }
 });
