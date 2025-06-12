@@ -75,7 +75,17 @@ cp setup-env.sh.template setup-env.sh
 
 5. Edit `setup-env.sh` and add your Supabase credentials
 
-### 4. Build Your App with Claude Code
+6. Source the environment to set up your project:
+   ```bash
+   source setup-env.sh dev
+   ```
+   
+   This will:
+   - Set all environment variables
+   - Link your Supabase project
+   - Generate `frontend/env.js` for local development
+
+### 5. Build Your App with Claude Code
 
 This is where Claude Code shines! Before setting up the database, customize the template:
 
@@ -96,7 +106,7 @@ Claude Code will:
 - Implement features across the entire stack
 - Maintain consistency with the existing codebase
 
-### 5. Setup Database
+### 6. Setup Database
 
 ```bash
 # Make sure you've sourced your environment first
@@ -108,13 +118,13 @@ source setup-env.sh dev
 
 **Important**: This script is idempotent but destructive - it drops and recreates all tables each time it runs. This ensures a clean state but will DELETE ALL DATA. Perfect for development, but don't run on production data!
 
-### 6. Configure Authentication
+### 7. Configure Authentication
 
 1. Go to Supabase Dashboard → Authentication → Email Templates
 2. Update the magic link template if desired
 3. Configure allowed domains in Authentication → URL Configuration
 
-### 7. Configure Cloudflare
+### 8. Configure Cloudflare
 
 1. Create a Cloudflare Pages project
 2. Get your Cloudflare credentials:
@@ -128,7 +138,7 @@ source setup-env.sh dev
    - `CLOUDFLARE_API_TOKEN`
    - `CLOUDFLARE_PROJECT_NAME` (your Pages project name)
 
-### 8. Deploy with Claude Code
+### 9. Deploy with Claude Code
 
 ```bash
 # Ask Claude Code to deploy:
@@ -147,15 +157,9 @@ source setup-env.sh dev  # or 'prod' for production
 
 ### Local Development Setup
 
-For local development, create `frontend/env.js`:
+After running `source setup-env.sh dev`, your `frontend/env.js` is automatically created.
 
-```javascript
-// frontend/env.js
-window.SUPABASE_URL = 'your-supabase-url';
-window.SUPABASE_ANON_KEY = 'your-anon-key';
-```
-
-Then open `frontend/index.html` in a browser or use a local server:
+Start a local server:
 
 ```bash
 cd frontend
