@@ -49,22 +49,45 @@ EOF
 echo -e "${GREEN}✓ env.js generated${NC}"
 echo ""
 
-# Deploy the frontend
+# Deploy the frontend and capture output
 echo -e "${GREEN}Deploying to Cloudflare Pages...${NC}"
-wrangler pages deploy "$FRONTEND_DIR" --project-name="$CLOUDFLARE_PROJECT_NAME"
+DEPLOY_OUTPUT=$(wrangler pages deploy "$FRONTEND_DIR" --project-name="$CLOUDFLARE_PROJECT_NAME" 2>&1)
 
 DEPLOY_STATUS=$?
 if [ $DEPLOY_STATUS -ne 0 ]; then
     echo -e "${RED}Error: Failed to deploy to Cloudflare Pages.${NC}"
+    echo "$DEPLOY_OUTPUT"
     exit $DEPLOY_STATUS
+fi
+
+# Display deployment output
+echo "$DEPLOY_OUTPUT"
+
+# Extract the project's stable domain
+# The deployment URL contains a hash prefix, but the stable domain is project-name + random suffix
+# Extract from deployment URL pattern: https://[hash].[project-name]-[suffix].pages.dev
+DEPLOYMENT_URL=$(echo "$DEPLOY_OUTPUT" | grep -oE "https://[a-f0-9]+\.[a-zA-Z0-9-]+\.pages\.dev" | tail -1)
+if [ -n "$DEPLOYMENT_URL" ]; then
+    # Extract the stable domain part (everything after the first dot)
+    STABLE_DOMAIN=$(echo "$DEPLOYMENT_URL" | sed 's|https://[^.]*\.||')
 fi
 
 echo -e ""
 echo -e "${GREEN}=== Frontend Deployment Complete ===${NC}"
-echo -e "${GREEN}Check the deployment URL above ↑${NC}"
+
+if [ -n "$STABLE_DOMAIN" ]; then
+    echo -e "${GREEN}Your app is deployed at:${NC}"
+    echo -e "${YELLOW}Stable domain: https://${STABLE_DOMAIN}${NC}"
+    if [ -n "$DEPLOYMENT_URL" ]; then
+        echo -e "${YELLOW}This deployment: ${DEPLOYMENT_URL}${NC}"
+    fi
+else
+    echo -e "${GREEN}Check the deployment URL above ↑${NC}"
+fi
+
 echo ""
 echo -e "${GREEN}Next steps:${NC}"
-echo "1. Visit your deployed app using the URL shown above"
-echo "2. Test authentication flow"
-echo "3. Monitor performance in Cloudflare dashboard"
+echo "1. Visit your deployed app"
+echo "2. Run the test suite to verify setup"
+echo "3. Monitor logs in Cloudflare dashboard"
 echo "4. Set up custom domain if needed"
