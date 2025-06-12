@@ -145,6 +145,24 @@ source setup-env.sh dev  # or 'prod' for production
 
 ## Development with Claude Code
 
+### Local Development Setup
+
+For local development, create `frontend/env.js`:
+
+```javascript
+// frontend/env.js
+window.SUPABASE_URL = 'your-supabase-url';
+window.SUPABASE_ANON_KEY = 'your-anon-key';
+```
+
+Then open `frontend/index.html` in a browser or use a local server:
+
+```bash
+cd frontend
+python -m http.server 8000
+# Visit http://localhost:8000
+```
+
 ### AI-Assisted Development
 
 Claude Code is your AI pair programmer. Here are some examples:

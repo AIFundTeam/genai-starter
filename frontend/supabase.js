@@ -7,14 +7,15 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 // Create Supabase client
-const supabase = supabaseLib.createClient(supabaseUrl, supabaseAnonKey);
+// When loaded from CDN, Supabase is available as window.supabase
+const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
 
-// Make it globally available
-window.supabase = supabase;
+// Make the client globally available
+window.supabaseClient = supabaseClient;
 
 // Database operations
 async function selectFrom(table, columns = '*', filters = {}) {
-    let query = supabase.from(table).select(columns);
+    let query = supabaseClient.from(table).select(columns);
     
     // Apply filters
     Object.entries(filters).forEach(([key, value]) => {
@@ -34,7 +35,7 @@ async function selectFrom(table, columns = '*', filters = {}) {
 }
 
 async function insertInto(table, data) {
-    const { data: result, error } = await supabase
+    const { data: result, error } = await supabaseClient
         .from(table)
         .insert(data)
         .select();
@@ -48,7 +49,7 @@ async function insertInto(table, data) {
 }
 
 async function updateIn(table, id, updates) {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
         .from(table)
         .update(updates)
         .eq('id', id)
@@ -63,7 +64,7 @@ async function updateIn(table, id, updates) {
 }
 
 async function deleteFrom(table, id) {
-    const { error } = await supabase
+    const { error } = await supabaseClient
         .from(table)
         .delete()
         .eq('id', id);
@@ -76,7 +77,7 @@ async function deleteFrom(table, id) {
 
 // Realtime subscriptions
 function subscribeToTable(table, callback, filters = {}) {
-    let channel = supabase.channel(`${table}-changes`);
+    let channel = supabaseClient.channel(`${table}-changes`);
     
     // Build filter string
     let filterStr = '';
@@ -108,13 +109,13 @@ function subscribeToTable(table, callback, filters = {}) {
 }
 
 function unsubscribe(channel) {
-    supabase.removeChannel(channel);
+    supabaseClient.removeChannel(channel);
 }
 
 // Edge function invocation
 async function invokeEdgeFunction(functionName, payload = {}) {
     try {
-        const { data, error } = await supabase.functions.invoke(functionName, {
+        const { data, error } = await supabaseClient.functions.invoke(functionName, {
             body: payload
         });
         
@@ -132,7 +133,7 @@ async function invokeEdgeFunction(functionName, payload = {}) {
 
 // Storage operations
 async function uploadFile(bucket, path, file) {
-    const { data, error } = await supabase.storage
+    const { data, error } = await supabaseClient.storage
         .from(bucket)
         .upload(path, file);
     
@@ -145,7 +146,7 @@ async function uploadFile(bucket, path, file) {
 }
 
 async function getPublicUrl(bucket, path) {
-    const { data } = supabase.storage
+    const { data } = supabaseClient.storage
         .from(bucket)
         .getPublicUrl(path);
     
@@ -153,7 +154,7 @@ async function getPublicUrl(bucket, path) {
 }
 
 async function deleteFile(bucket, paths) {
-    const { error } = await supabase.storage
+    const { error } = await supabaseClient.storage
         .from(bucket)
         .remove(paths);
     
@@ -164,15 +165,13 @@ async function deleteFile(bucket, paths) {
 }
 
 // Export functions
-window.supabaseClient = {
-    selectFrom,
-    insertInto,
-    updateIn,
-    deleteFrom,
-    subscribeToTable,
-    unsubscribe,
-    invokeEdgeFunction,
-    uploadFile,
-    getPublicUrl,
-    deleteFile
-};
+window.invokeEdgeFunction = invokeEdgeFunction;
+window.selectFrom = selectFrom;
+window.insertInto = insertInto;
+window.updateIn = updateIn;
+window.deleteFrom = deleteFrom;
+window.subscribeToTable = subscribeToTable;
+window.unsubscribe = unsubscribe;
+window.uploadFile = uploadFile;
+window.getPublicUrl = getPublicUrl;
+window.deleteFile = deleteFile;

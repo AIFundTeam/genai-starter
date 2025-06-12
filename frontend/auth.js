@@ -8,14 +8,14 @@ window.authReady = new Promise((resolve) => {
 
 // Authentication initialization
 document.addEventListener('DOMContentLoaded', () => {
-    if (!window.supabase) {
+    if (!window.supabaseClient) {
         console.error("Supabase client not found!");
         document.body.innerHTML = '<h1>Application Error</h1><p>Could not initialize. Please refresh the page.</p>';
         return;
     }
 
     // Listen for auth state changes
-    supabase.auth.onAuthStateChange((_event, session) => {
+    supabaseClient.auth.onAuthStateChange((_event, session) => {
         console.log('Auth state changed:', _event);
         currentUser = session?.user ?? null;
         
@@ -93,7 +93,7 @@ async function updateUI() {
 // Get current user's role from database
 async function getUserRole() {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('user_roles')
             .select('role')
             .eq('user_id', currentUser.id)
@@ -116,7 +116,7 @@ function setupEventListeners() {
             e.preventDefault();
             console.log('Signing out...');
             
-            const { error } = await supabase.auth.signOut();
+            const { error } = await supabaseClient.auth.signOut();
             if (error) {
                 console.error('Error signing out:', error);
                 alert(`Error signing out: ${error.message}`);
@@ -143,7 +143,7 @@ function setupEventListeners() {
             submitBtn.textContent = 'Sending...';
             
             try {
-                const { error } = await supabase.auth.signInWithOtp({
+                const { error } = await supabaseClient.auth.signInWithOtp({
                     email,
                     options: {
                         emailRedirectTo: `${window.location.origin}/index.html`
