@@ -262,30 +262,6 @@ For multiple environments (dev/staging/prod), create separate copies of `setup-e
 4. **Keep API keys secure** - never expose in frontend code
 5. **Store secrets** in Supabase Edge Function secrets, not in code
 
-## Troubleshooting
-
-### "Missing Supabase configuration" errors
-- Ensure `env.js` exists (created by deploy_frontend.sh)
-- Check that `env.js` is loaded FIRST in your HTML files
-- Verify SUPABASE_URL and SUPABASE_ANON_KEY are set correctly
-
-### CORS errors
-- Update `allowedOrigins` in `_shared/cors.ts`
-- Redeploy edge functions
-- Check browser console for specific origin
-
-### Database connection errors
-- Check that RLS policies allow access (they should be open)
-- Verify the items table exists (run ./setup_database.sh)
-- Test queries in Supabase SQL editor
-- Ensure anon key has correct permissions
-
-### Edge function errors (401/403)
-- Ensure functions are deployed with --no-verify-jwt flag
-- Check OPENAI_API_KEY is set in Supabase secrets
-- Verify Supabase access token is valid
-- Try redeploying with ./deploy_backend.sh
-
 ## Working with Claude Code
 
 ### Best Practices
@@ -312,14 +288,6 @@ claude "I need a blog system with markdown support"
 # Review and deploy
 claude "Show me what changed and deploy to production"
 ```
-
-## Resources
-
-- [Claude Code Documentation](https://www.anthropic.com/claude-code)
-- [Supabase Documentation](https://supabase.com/docs)
-- [Cloudflare Pages Documentation](https://developers.cloudflare.com/pages)
-- [Deno Documentation](https://deno.land/manual)
-- [PostgreSQL Documentation](https://www.postgresql.org/docs/)
 
 ## Why This Stack?
 
