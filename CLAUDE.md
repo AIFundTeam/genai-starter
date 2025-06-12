@@ -9,7 +9,7 @@ This is a full-stack web application template built with:
 - **Backend**: Supabase Edge Functions (Deno runtime)
 - **Database**: PostgreSQL via Supabase
 - **Hosting**: Cloudflare Pages (frontend), Supabase (backend)
-- **Users**: Simple username-based system (no authentication)
+- **Users**: Email-based user identification (no passwords or authentication)
 - **AI/LLM**: OpenAI API integration (required)
 
 ## Key Commands
@@ -39,10 +39,10 @@ supabase functions deploy <function-name> --project-ref $SUPABASE_PROJECT_REF
 ```
 template/
 ├── frontend/               # Frontend application
-│   ├── index.html         # Main application (requires authentication)
-│   ├── login.html         # Login page
+│   ├── index.html         # Main application (shows after login)
+│   ├── login.html         # Login page (email entry only, no password)
 │   ├── index.js           # Main app logic
-│   ├── auth.js            # Authentication utilities
+│   ├── user.js            # User management (email storage)
 │   ├── supabase.js        # Supabase client
 │   ├── style.css          # Styles
 │   └── env.js             # Environment variables (generated)
@@ -64,14 +64,15 @@ template/
 
 ### Page Structure
 
-**Single page application:**
-- `index.html` - The MAIN APPLICATION
-- No login required - users just enter their name
+**Application Pages:**
+- `login.html` - Email entry page (users enter email, no password)
+- `index.html` - Main application (shows after user enters email)
 
 **User Flow:**
-1. User visits site → prompted for username
-2. Username stored in localStorage
-3. All data is associated with username
+1. User visits site → redirected to login.html if no email stored
+2. User enters email (no password required) → stored in localStorage
+3. User redirected to index.html (main app)
+4. All data is associated with user's email
 
 **When users ask you to build features:**
 - ✅ ALWAYS modify `index.html` and `index.js` for app functionality
@@ -107,11 +108,12 @@ window.SUPABASE_ANON_KEY = 'eyJ...';
 ### Key Patterns
 
 1. **User Management**
-   - User enters username when first visiting
-   - Username stored in localStorage
-   - Can change username anytime
+   - User enters email on login page (login.html)
+   - Email stored in localStorage (no password)
+   - Users redirected to login.html if no email found
+   - Can change email via settings in the app
    - No passwords or authentication required
-   - All data associated with username
+   - All data associated with user's email
 
 2. **Frontend Patterns**
    - Modular JavaScript with clear separation of concerns
@@ -129,9 +131,9 @@ window.SUPABASE_ANON_KEY = 'eyJ...';
 
 4. **Database Patterns**
    - UUID primary keys
-   - Row Level Security (RLS) policies
+   - Row Level Security (RLS) policies (open access, no auth checks)
    - Audit fields (created_at, updated_at)
-   - Username field for data ownership
+   - user_email field for data ownership
    - Soft delete pattern where appropriate
    - **Idempotent schema**: setup_database.sh drops and recreates tables
 
@@ -225,11 +227,15 @@ window.SUPABASE_ANON_KEY = 'eyJ...';
 
 ### Common Implementation Patterns
 
-1. **Check Authentication Status**
+1. **Check User Status**
    ```javascript
-   const user = await window.requireAuth();  // Will redirect to login if not authenticated
-   // Or just get current user:
-   const currentUser = window.getCurrentUser();
+   // Get current user email (redirects to login.html if not set)
+   const userEmail = window.getCurrentUser();
+   
+   // User management is handled by user.js which:
+   // - Checks localStorage for userEmail
+   // - Redirects to login.html if not found
+   // - Provides getCurrentUser() and changeUser() functions
    ```
 
 2. **Make Authenticated API Call**
@@ -278,7 +284,7 @@ window.SUPABASE_ANON_KEY = 'eyJ...';
 
 ### Troubleshooting
 
-- **User issues**: Check localStorage and username storage
+- **User issues**: Check localStorage for userEmail key
 - **CORS errors**: Verify frontend URL in CORS configuration
 - **Database errors**: Check RLS policies and user permissions
 - **Function errors**: View logs in Supabase dashboard
