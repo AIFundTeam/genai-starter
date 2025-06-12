@@ -170,7 +170,7 @@ Always include scripts in this exact order:
 <script src="env.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase.js"></script>
-<script src="auth.js"></script>
+<script src="user.js"></script>
 <script src="index.js"></script>  <!-- or your page-specific script -->
 ```
 
@@ -178,7 +178,7 @@ Always include scripts in this exact order:
 1. `env.js` - Sets up environment variables (MUST be first)
 2. Supabase CDN - Provides the Supabase library
 3. `supabase.js` - Creates the Supabase client
-4. `auth.js` - Sets up authentication
+4. `user.js` - Sets up user management
 5. Your app logic - Can now use everything above
 
 ### Adding New Features
@@ -186,7 +186,7 @@ Always include scripts in this exact order:
 1. **New Page (rarely needed)**
    - Most features should be added to index.html
    - Only create new pages if specifically requested
-   - Update auth.js routing if adding pages
+   - Update user.js routing if adding pages
 
 2. **New Edge Function**
    - Create folder in supabase/functions/
@@ -201,7 +201,7 @@ Always include scripts in this exact order:
    - Enable realtime if needed
 
 4. **Environment Variables**
-   - Add to setup-env.sh.template
+   - Add to env.config
    - Document in README.md
    - Use in code via env.js (frontend) or Deno.env (backend)
    - OpenAI API key is automatically set as Edge Function secret

@@ -18,7 +18,6 @@ if [ -z "$SUPABASE_PROJECT_REF" ] || [ -z "$SUPABASE_ACCESS_TOKEN" ] || [ -z "$O
 fi
 
 echo -e "${YELLOW}Deploying to project: $SUPABASE_PROJECT_REF${NC}"
-echo -e "${YELLOW}Environment: $ENVIRONMENT${NC}"
 
 # Check if supabase CLI is installed
 if ! command -v supabase &> /dev/null; then

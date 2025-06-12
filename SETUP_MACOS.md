@@ -103,8 +103,6 @@ Once all tools are installed:
 
 3. Set up the environment:
    ```bash
-   cp setup-env.sh.template setup-env.sh
-   chmod +x setup-env.sh
    source setup-env.sh
    ```
 

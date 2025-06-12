@@ -247,12 +247,6 @@ Claude Code will handle:
 - Updating the schema
 - Maintaining consistency
 
-## Environment Management
-
-For multiple environments (dev/staging/prod), create separate copies of `setup-env.sh` with different values:
-- `setup-env-dev.sh`
-- `setup-env-staging.sh`
-- `setup-env-prod.sh`
 
 ## Security Best Practices
 
