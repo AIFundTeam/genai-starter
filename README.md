@@ -327,10 +327,6 @@ This starter uses technologies specifically chosen to work well with Claude Code
 - **Modern Standards** - Uses web standards that Claude Code knows well
 - **Production Ready** - Scales from prototype to production seamlessly
 
-## License
-
-MIT - Use this template for any project!
-
 ## Contributing
 
 Feel free to submit issues and PRs to improve this template.
