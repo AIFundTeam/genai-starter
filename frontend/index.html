@@ -16,7 +16,7 @@
             </div>
             <nav>
                 <span class="user-info">User: <strong id="current-user">Loading...</strong></span>
-                <button class="btn btn-small" onclick="changeUser()">Change User</button>
+                <button class="btn btn-small" onclick="logout()">Logout</button>
             </nav>
         </div>
     </header>
@@ -49,10 +49,13 @@
                         </div>
                     </div>
                     
-                    <!-- Test Setup Section -->
+                    <!-- Test Setup Section (Collapsible) -->
                     <div class="test-setup">
-                        <h3>🧪 Test Your Setup</h3>
-                        <p>Verify your full-stack configuration is working correctly:</p>
+                        <button class="collapsible-header" onclick="toggleTestSection()">
+                            <span id="test-toggle-icon">▶</span> 🧪 Test Your Setup
+                        </button>
+                        <div id="test-content" class="collapsible-content" style="display: none;">
+                            <p>Verify your full-stack configuration is working correctly:</p>
                         
                         <div class="test-grid">
                             <div class="test-card">
@@ -73,7 +76,7 @@
                                     Test Public API
                                 </button>
                                 <button class="btn btn-secondary" onclick="testProtectedEndpoint()">
-                                    Test Protected API
+                                    Test User API
                                 </button>
                             </div>
                             
@@ -93,6 +96,7 @@
                         <div class="test-success" id="test-success" style="display: none;">
                             <h4>🎉 All Tests Passed!</h4>
                             <p>Your setup is working correctly. You can now ask Claude Code to build your custom app.</p>
+                        </div>
                         </div>
                     </div>
                 </section>
@@ -123,8 +127,8 @@
                             <input type="email" id="settings-email" disabled>
                         </div>
                         
-                        <button class="btn btn-primary" onclick="changeUser()">
-                            Change User
+                        <button class="btn btn-primary" onclick="logout()">
+                            Logout
                         </button>
                         
                         <h3>Preferences</h3>

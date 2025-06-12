@@ -16,8 +16,8 @@ This is a full-stack web application template built with:
 
 ```bash
 # Initial setup (run once)
-cp setup-env.sh.template setup-env.sh
-# Edit setup-env.sh with your Supabase and Cloudflare credentials
+cp env.config.template env.config
+# Edit env.config with your Supabase and Cloudflare credentials
 source setup-env.sh
 
 # Database setup (run once)
@@ -32,6 +32,13 @@ source setup-env.sh
 # Deploy specific function
 supabase functions deploy <function-name> --project-ref $SUPABASE_PROJECT_REF
 ```
+
+## ⚠️ Most Common Error
+
+**If you see "Missing Supabase configuration" or similar errors:**
+1. Make sure `env.js` exists (created by deploy_frontend.sh)
+2. Make sure `env.js` is loaded FIRST in your HTML (before all other scripts)
+3. See "Script Loading Order" section below for details
 
 ## Architecture
 
@@ -51,13 +58,14 @@ template/
 │   │   ├── _shared/       # Shared utilities
 │   │   │   └── cors.ts    # CORS configuration
 │   │   ├── hello-world/   # Example public endpoint
-│   │   └── protected-endpoint/ # Example authenticated endpoint
+│   │   └── user-endpoint/  # Example user data endpoint
 │   └── config.toml        # Supabase configuration
 ├── sql/
 │   └── schema.sql         # Database schema
 ├── deploy_backend.sh      # Backend deployment script
 ├── deploy_frontend.sh     # Frontend deployment script
-├── setup-env.sh.template  # Environment setup template
+├── setup-env.sh           # Environment setup script
+├── env.config.template    # Configuration template
 ├── CLAUDE.md             # This file
 └── README.md             # Setup instructions
 ```
@@ -74,11 +82,19 @@ template/
 3. User redirected to index.html (main app)
 4. All data is associated with user's email
 
-**When users ask you to build features:**
-- ✅ ALWAYS modify `index.html` and `index.js` for app functionality
+## 📝 Frontend File Strategy
+
+**IMPORTANT: Always modify existing files instead of creating new ones!**
+
+When users ask you to build features:
+- ✅ **ALWAYS modify `index.html`** - This is the main app, put ALL features here
+- ✅ **ALWAYS modify `index.js`** - All JavaScript logic goes here
+- ✅ **NEVER create new HTML files** (no app.html, dashboard.html, etc.)
+- ✅ **NEVER create new JS files** (no app.js, utils.js, etc.)
 - ✅ Update schema.sql for database changes
 - ✅ Create edge functions for backend logic
-- ❌ NEVER create app.html or other HTML files unless specifically requested
+
+**Why?** The template is designed as a single-page application. Creating new files breaks the routing and user management. Everything should be added to the existing index.html/js files.
 
 **Test Setup Flow:**
 The template includes a comprehensive test section in the dashboard to verify:
@@ -144,9 +160,11 @@ window.SUPABASE_ANON_KEY = 'eyJ...';
    - Verify authentication in edge functions
    - Use admin client only when necessary
 
-### Script Loading Order in HTML Files
+### ⚠️ CRITICAL: Script Loading Order in HTML Files
 
-**CRITICAL**: Always include scripts in this exact order:
+**THIS IS THE #1 CAUSE OF ERRORS - env.js MUST BE LOADED FIRST!**
+
+Always include scripts in this exact order:
 ```html
 <!-- At the bottom of your HTML file, before </body> -->
 <script src="env.js"></script>
@@ -172,7 +190,7 @@ window.SUPABASE_ANON_KEY = 'eyJ...';
 
 2. **New Edge Function**
    - Create folder in supabase/functions/
-   - Copy structure from hello-world or protected-endpoint
+   - Copy structure from hello-world or user-endpoint
    - Import CORS from _shared/cors.ts
    - Deploy with deploy_backend.sh
 
@@ -188,9 +206,44 @@ window.SUPABASE_ANON_KEY = 'eyJ...';
    - Use in code via env.js (frontend) or Deno.env (backend)
    - OpenAI API key is automatically set as Edge Function secret
 
+### IMPORTANT: About the "items" Table
+
+The template includes a pre-built `items` table as an example. When building a new app:
+
+**Option 1: Replace the items table (RECOMMENDED)**
+- Remove the items table from schema.sql
+- Create your own tables (e.g., todos, notes, posts)
+- Update all references in the frontend
+- This gives you a clean, purpose-built schema
+
+**Option 2: Repurpose the items table**
+- Keep the table but rename it in schema.sql
+- Update the columns to match your needs
+- Modify the frontend to use your new fields
+
+**Option 3: Extend with new tables**
+- Keep items as an example (can delete later)
+- Add your new tables alongside it
+- Build your features independently
+
+### LLM Integration Pattern
+
+The template includes a working OpenAI integration example in `test-llm` function:
+- Accepts a prompt and user_email
+- Calls OpenAI GPT-3.5-turbo
+- Returns the AI response
+- Handles errors gracefully
+
+**To use this pattern in your own functions:**
+1. Copy the `test-llm` function as a starting point
+2. Modify the system prompt for your use case
+3. Adjust max_tokens and temperature as needed
+4. Add any additional context or parameters
+
 ### Common User Requests and How to Handle Them
 
 1. **"Build a [todo/notes/task/etc] app"**
+   - **First decision**: Replace or extend the items table (see above)
    - Modify `index.html` and `index.js` for the app UI
    - Update schema.sql with appropriate tables
    - Create edge functions for CRUD operations
@@ -235,7 +288,7 @@ window.SUPABASE_ANON_KEY = 'eyJ...';
    // User management is handled by user.js which:
    // - Checks localStorage for userEmail
    // - Redirects to login.html if not found
-   // - Provides getCurrentUser() and changeUser() functions
+   // - Provides getCurrentUser() and logout() functions
    ```
 
 2. **Make Authenticated API Call**

@@ -59,24 +59,31 @@ cd <your-project>
 ### 4. Setup Environment
 
 ```bash
-cp setup-env.sh.template setup-env.sh
+cp env.config.template env.config
 ```
 
-Edit `setup-env.sh` and fill in all the values at the top of the file:
+Edit `env.config` and fill in your credentials:
 
 **Supabase Values** (from your Supabase project):
 - `SUPABASE_PROJECT_REF` - Settings → General (e.g., "xyzcompanyorxyz")
 - `SUPABASE_ANON_KEY` - Settings → API → anon public
 - `SUPABASE_SERVICE_ROLE_KEY` - Settings → API → service_role
 - `SUPABASE_DB_PASSWORD` - The password you saved when creating the project
-- `SUPABASE_ACCESS_TOKEN` - The token you just created
+- `SUPABASE_ACCESS_TOKEN` - The personal access token you created in step 2
 
 **Cloudflare Values**:
-- `CLOUDFLARE_ACCOUNT_ID` - Found in dashboard right sidebar
-- `CLOUDFLARE_API_TOKEN` - My Profile → API Tokens → Create Token
-  - Use "Edit Cloudflare Workers" template
-  - Add permission: Account:Cloudflare Pages:Edit
-- `CLOUDFLARE_PROJECT_NAME` - The name of your Pages project
+- `CLOUDFLARE_ACCOUNT_ID` - Found in any Cloudflare dashboard page (right sidebar)
+- `CLOUDFLARE_API_TOKEN` - Create one following these steps:
+  1. Go to [My Profile → API Tokens](https://dash.cloudflare.com/profile/api-tokens)
+  2. Click "Create Token"
+  3. Use "Custom token" template
+  4. Set permissions:
+     - Account → Cloudflare Pages:Edit
+     - Account → Account Settings:Read (for account ID verification)
+  5. Set Account Resources: Include → Your account
+  6. Click "Continue to summary" → "Create Token"
+  7. **IMPORTANT**: Copy the token immediately (you won't see it again!)
+- `CLOUDFLARE_PROJECT_NAME` - Choose a name for your project (e.g., "my-app")
 
 **OpenAI Values**:
 - `OPENAI_API_KEY` - Get from [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
@@ -84,7 +91,7 @@ Edit `setup-env.sh` and fill in all the values at the top of the file:
 ### 5. Source Environment
 
 ```bash
-source setup-env.sh
+source setup-env.sh  # This reads from env.config
 ```
 
 This will:
@@ -189,9 +196,10 @@ python -m http.server 8000
 # Public endpoint
 curl https://<project-ref>.supabase.co/functions/v1/hello-world
 
-# Protected endpoint (requires auth token)
-curl https://<project-ref>.supabase.co/functions/v1/protected-endpoint \
-  -H "Authorization: Bearer <user-jwt-token>"
+# User endpoint (no auth required, just pass user email)
+curl https://<project-ref>.supabase.co/functions/v1/user-endpoint \
+  -H "Content-Type: application/json" \
+  -d '{"user_email": "user@example.com"}'
 ```
 
 ### Directory Structure
@@ -207,10 +215,11 @@ curl https://<project-ref>.supabase.co/functions/v1/protected-endpoint \
 ├── supabase/functions/    # Edge functions
 │   ├── _shared/           # Shared utilities
 │   ├── hello-world/       # Example endpoint
-│   └── protected-endpoint/# Auth example
+│   └── user-endpoint/  # User data example
 ├── sql/                   # Database schema
 ├── deploy_*.sh           # Deployment scripts
-└── setup-env.sh.template # Environment template
+├── setup-env.sh       # Environment setup script
+└── env.config.template # Configuration template
 ```
 
 ## Customization

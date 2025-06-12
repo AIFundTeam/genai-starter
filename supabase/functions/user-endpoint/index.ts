@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error('Error in protected-endpoint function:', error);
+    console.error('Error in user-endpoint function:', error);
     
     return new Response(
       JSON.stringify({

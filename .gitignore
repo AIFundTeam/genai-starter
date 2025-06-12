@@ -1,5 +1,5 @@
 # Environment and secrets
-setup-env.sh
+env.config
 .env
 .env.local
 .env.*.local

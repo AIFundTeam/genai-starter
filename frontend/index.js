@@ -139,7 +139,7 @@ async function testProtectedEndpoint() {
     resultsDiv.innerHTML = '<p>⏳ Testing user API endpoint...</p>';
     
     try {
-        const data = await window.invokeEdgeFunction('protected-endpoint', {
+        const data = await window.invokeEdgeFunction('user-endpoint', {
             user_email: window.getCurrentUser()
         });
         
@@ -335,6 +335,23 @@ function saveSettings() {
     
     alert('Settings saved!');
 }
+
+// Toggle test section
+function toggleTestSection() {
+    const content = document.getElementById('test-content');
+    const icon = document.getElementById('test-toggle-icon');
+    
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+        icon.textContent = '▼';
+    } else {
+        content.style.display = 'none';
+        icon.textContent = '▶';
+    }
+}
+
+// Make toggle function global
+window.toggleTestSection = toggleTestSection;
 
 // Cleanup on page unload
 window.addEventListener('beforeunload', () => {

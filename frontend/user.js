@@ -26,13 +26,11 @@ function updateUserDisplay() {
     }));
 }
 
-// Change user (logout and login as different user)
-window.changeUser = function() {
-    if (confirm('Switch to a different user?')) {
-        localStorage.removeItem('userEmail');
-        currentUser = null;
-        window.location.href = 'login.html';
-    }
+// Logout function
+window.logout = function() {
+    localStorage.removeItem('userEmail');
+    currentUser = null;
+    window.location.href = 'login.html';
 };
 
 // Get current user
