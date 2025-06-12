@@ -294,6 +294,7 @@ For multiple environments (dev/staging/prod), create separate copies of `setup-e
 2. **Iterate Quickly** - Make small changes and test frequently
 3. **Use the CLAUDE.md** - It contains project-specific instructions
 4. **Trust the Assistant** - Claude Code understands the entire codebase
+5. **Document Your Vision First** - Before coding, write down what you hope to accomplish in a narrative document. Use this to align on goals with teammates. Often the alignment process is both time-consuming and the most important part of any project. Once this narrative document is locked down, Claude Code can often execute on it in a single pass.
 
 ### Example Workflow
 
