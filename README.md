@@ -256,11 +256,11 @@ For multiple environments (dev/staging/prod), create separate copies of `setup-e
 
 ## Security Best Practices
 
-1. **Never commit** `setup-env.sh` (it's in .gitignore)
-2. **Use RLS policies** on all database tables
+1. **Never commit** `env.config` (it's in .gitignore)
+2. **Use RLS policies** on all database tables (though open for this template)
 3. **Validate inputs** in edge functions
-4. **Check authentication** before sensitive operations
-5. **Keep service role key** secret
+4. **Keep API keys secure** - never expose in frontend code
+5. **Store secrets** in Supabase Edge Function secrets, not in code
 
 ## Troubleshooting
 
