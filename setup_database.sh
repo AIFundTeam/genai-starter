@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Database Setup Script (using Supabase CLI)
-# This script runs the SQL schema using Supabase CLI
+# This script runs the SQL schema using supabase db push
 # The schema is idempotent - it drops and recreates all objects
 
 set -e  # Exit on error
@@ -43,10 +43,25 @@ echo "   - items"
 echo ""
 echo "This is safe for development but will DELETE ALL DATA."
 echo ""
+read -p "Continue? (y/N) " -n 1 -r
+echo ""
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo "Cancelled."
+    exit 0
+fi
 
-# Run the SQL directly without migrations
+# Create migrations directory if it doesn't exist
+mkdir -p supabase/migrations
+
+# Copy our schema to migrations with a timestamp
+TIMESTAMP=$(date +%Y%m%d%H%M%S)
+MIGRATION_FILE="supabase/migrations/${TIMESTAMP}_schema.sql"
+cp sql/schema.sql "$MIGRATION_FILE"
+
 echo "Applying schema to database..."
-supabase db execute --file sql/schema.sql
+
+# Push to remote database
+supabase db push --password "$SUPABASE_DB_PASSWORD"
 
 if [ $? -eq 0 ]; then
     echo ""
@@ -63,9 +78,13 @@ if [ $? -eq 0 ]; then
     echo ""
     echo "Note: This script is idempotent and can be run multiple times."
     echo "      Each run will drop and recreate all tables."
+    
+    # Clean up migration file after success
+    rm -f "$MIGRATION_FILE"
 else
     echo ""
     echo "❌ Database setup failed"
-    echo "Please check the error messages above"
+    echo "Migration file left at: $MIGRATION_FILE"
+    echo "You can retry with: supabase db push --password \$SUPABASE_DB_PASSWORD"
     exit 1
 fi
