@@ -22,6 +22,9 @@ fi
 # Source the configuration
 source env.config
 
+# Derive SUPABASE_URL from PROJECT_REF
+export SUPABASE_URL="https://${SUPABASE_PROJECT_REF}.supabase.co"
+
 # Export all variables for use by other scripts
 export SUPABASE_PROJECT_REF
 export SUPABASE_URL
