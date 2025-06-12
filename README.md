@@ -50,13 +50,7 @@ cd <your-project>
    - Go to [app.supabase.com/account/tokens](https://app.supabase.com/account/tokens)
    - Generate a new token
 
-### 3. Create Cloudflare Pages Project
-
-1. Go to [dash.cloudflare.com](https://dash.cloudflare.com) → Pages
-2. Create a new Pages project (name it something like "your-app-name")
-3. Skip the git integration for now
-
-### 4. Setup Environment
+### 3. Setup Environment
 
 ```bash
 cp env.config.template env.config
@@ -88,7 +82,7 @@ Edit `env.config` and fill in your credentials:
 **OpenAI Values**:
 - `OPENAI_API_KEY` - Get from [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
 
-### 5. Source Environment
+### 4. Source Environment
 
 ```bash
 source setup-env.sh  # This reads from env.config
@@ -99,7 +93,7 @@ This will:
 - Link your Supabase project
 - Generate `frontend/env.js` for deployment
 
-### 6. Setup Database
+### 5. Setup Database
 
 ```bash
 # Run the database setup (WARNING: drops existing tables!)
@@ -108,14 +102,14 @@ This will:
 
 **Important**: This script is idempotent but destructive - it drops and recreates all tables each time it runs. This ensures a clean state but will DELETE ALL DATA.
 
-### 7. Deploy
+### 6. Deploy
 
 ```bash
 ./deploy_backend.sh      # Deploy Supabase Edge Functions
 ./deploy_frontend.sh     # Deploy to Cloudflare Pages
 ```
 
-### 8. Test Your Setup
+### 7. Test Your Setup
 
 After deploying, verify everything is working by visiting your Cloudflare Pages URL.
 
