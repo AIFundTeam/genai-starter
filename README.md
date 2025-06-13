@@ -66,8 +66,8 @@ Edit `env.config` and fill in your credentials:
 
 **Supabase Values** (from your Supabase project):
 - `SUPABASE_PROJECT_REF` - Project Settings → General → Project ID
-- `SUPABASE_ANON_KEY` - Project Settings → API → anon public
-- `SUPABASE_SERVICE_ROLE_KEY` - Project Settings → API → service_role secret
+- `SUPABASE_ANON_KEY` - Project Settings → API Keys → anon public
+- `SUPABASE_SERVICE_ROLE_KEY` - Project Settings → API Keys → service_role secret
 - `SUPABASE_DB_PASSWORD` - The password you saved when creating the project
 - `SUPABASE_ACCESS_TOKEN` - The personal access token you created in step 2
 
