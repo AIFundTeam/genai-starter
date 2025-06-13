@@ -28,9 +28,8 @@ A Claude Code-optimized template for rapidly building full-stack web application
 - [OpenAI Account](https://platform.openai.com) with API key (required)
 - [Supabase Account](https://supabase.com) (free tier works)
 - [Cloudflare Account](https://cloudflare.com) (free tier works)
-- [Supabase CLI](https://supabase.com/docs/guides/cli) installed
-- [Node.js](https://nodejs.org) (for Cloudflare Wrangler)
-- Git
+
+**📝 For tool installation (Supabase CLI, Node.js, Git):** See [SETUP_MACOS.md](./SETUP_MACOS.md)
 
 ## Quick Start
 
@@ -133,6 +132,37 @@ The LLM test verifies your OpenAI API key is working. If it fails:
 3. Verify the secret was set: `supabase secrets list`
 
 Once all tests pass, you'll see "🎉 All Tests Passed!" and you're ready to build.
+
+### Troubleshooting Test Failures
+
+If any tests fail, here's how to debug with Claude Code:
+
+1. **Open browser developer tools** (F12 or right-click → Inspect)
+2. **Check the Console tab** for error messages
+3. **Copy the error messages** (right-click → "Copy message" or select and copy)
+4. **Open Claude Code** in your project directory:
+   ```bash
+   claude .
+   ```
+5. **Paste the errors** and ask Claude Code:
+   ```
+   "I'm getting these console errors when running the setup tests:
+   [paste your error messages here]
+   
+   Can you help me debug and fix this?"
+   ```
+
+**Additional debugging steps:**
+- **Network tab**: Check for failed API requests (red entries)
+- **Application tab**: Verify localStorage has `userEmail` set
+- **Sources tab**: Check if all JavaScript files are loading correctly
+
+**Common fixes Claude Code might suggest:**
+- Environment variable issues (`env.js` missing or incorrect)
+- API key problems (expired, invalid, or missing credits)
+- CORS configuration issues
+- Database connection problems
+- Edge function deployment issues
 
 ## Build Your App with Claude Code
 
