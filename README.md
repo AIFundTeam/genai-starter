@@ -55,9 +55,6 @@ cd genai-starter
 #### Create Cloudflare Account
 
 1. Go to [dash.cloudflare.com/sign-up](https://dash.cloudflare.com/sign-up) and create a new account
-   - Enter your email and password, then select "Create Account"
-   - **Tip**: For business use, consider using an email alias like "cloudflare@yourcompany.com"
-   - Cloudflare will send a verification email - check your inbox and verify your account
 
 ### 3. Setup Environment
 
