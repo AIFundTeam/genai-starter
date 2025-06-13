@@ -79,11 +79,9 @@ Edit `env.config` and fill in your credentials:
 - `CLOUDFLARE_API_TOKEN` - Create one following these steps:
   1. Go to [My Profile → API Tokens](https://dash.cloudflare.com/profile/api-tokens)
   2. Click "Create Token"
-  3. Use "Custom token" template
-  4. Set permissions:
-     - Account → Cloudflare Pages:Edit
-     - Account → Account Settings:Read (for deployment operations)
-  5. Set Account Resources: Include → Your account
+  3. Select "Edit Cloudflare Workers" template → "Use template"
+  4. **Account Resources**: Include → Your account
+  5. **Zone Resources**: Include → All zones
   6. Click "Continue to summary" → "Create Token"
   7. **IMPORTANT**: Copy the token secret immediately (it's only shown once!)
 - `CLOUDFLARE_PROJECT_NAME` - Choose a name for your project (e.g., "my-app")
