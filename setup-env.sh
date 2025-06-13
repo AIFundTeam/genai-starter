@@ -25,6 +25,35 @@ source env.config
 # Derive SUPABASE_URL from PROJECT_REF
 export SUPABASE_URL="https://${SUPABASE_PROJECT_REF}.supabase.co"
 
+# Auto-fetch Cloudflare Account ID from API token
+if [ -n "$CLOUDFLARE_API_TOKEN" ]; then
+    echo -e "${GREEN}Auto-fetching Cloudflare Account ID from API...${NC}"
+    
+    if command -v curl &> /dev/null; then
+        API_RESPONSE=$(curl -s -X GET "https://api.cloudflare.com/client/v4/accounts" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -H "Content-Type: application/json" 2>/dev/null)
+        
+        if echo "$API_RESPONSE" | grep -q '"success":true'; then
+            CLOUDFLARE_ACCOUNT_ID=$(echo "$API_RESPONSE" | python3 -c "import json, sys; data=json.load(sys.stdin); print(data['result'][0]['id'])" 2>/dev/null)
+            
+            if [ -n "$CLOUDFLARE_ACCOUNT_ID" ]; then
+                echo -e "${GREEN}✅ Account ID: $CLOUDFLARE_ACCOUNT_ID${NC}"
+                export CLOUDFLARE_ACCOUNT_ID
+            else
+                echo -e "${RED}❌ Failed to parse Account ID from API response${NC}"
+                return 1 2>/dev/null || exit 1
+            fi
+        else
+            echo -e "${RED}❌ API call failed. Please check your CLOUDFLARE_API_TOKEN${NC}"
+            return 1 2>/dev/null || exit 1
+        fi
+    else
+        echo -e "${RED}❌ curl not available for API call${NC}"
+        return 1 2>/dev/null || exit 1
+    fi
+fi
+
 # Export all variables for use by other scripts
 export SUPABASE_PROJECT_REF
 export SUPABASE_URL
@@ -44,6 +73,7 @@ REQUIRED_VARS=(
     "SUPABASE_DB_PASSWORD"
     "SUPABASE_SERVICE_ROLE_KEY"
     "SUPABASE_ACCESS_TOKEN"
+    "CLOUDFLARE_API_TOKEN"
     "CLOUDFLARE_ACCOUNT_ID"
     "CLOUDFLARE_PROJECT_NAME"
     "OPENAI_API_KEY"

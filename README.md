@@ -41,14 +41,24 @@ git clone <your-repo-url>
 cd <your-project>
 ```
 
-### 2. Create Supabase Project
+### 2. Create Supabase Project and Cloudflare Account
+
+#### Create Supabase Project
 
 1. Go to [app.supabase.com](https://app.supabase.com) and create a new project
-   - **IMPORTANT**: Save your database password when shown! It's only displayed once.
+   - Enter your project details and wait for the database to launch
+   - **IMPORTANT**: Save your database password when creating the project (you can reset it later in Database Settings if needed)
 
 2. Get your access token for deployments:
    - Go to [app.supabase.com/account/tokens](https://app.supabase.com/account/tokens)
-   - Generate a new token
+   - Generate a new token and save it securely
+
+#### Create Cloudflare Account
+
+1. Go to [dash.cloudflare.com/sign-up](https://dash.cloudflare.com/sign-up) and create a new account
+   - Enter your email and password, then select "Create Account"
+   - **Tip**: For business use, consider using an email alias like "cloudflare@yourcompany.com"
+   - Cloudflare will send a verification email - check your inbox and verify your account
 
 ### 3. Setup Environment
 
@@ -59,24 +69,23 @@ cp env.config.template env.config
 Edit `env.config` and fill in your credentials:
 
 **Supabase Values** (from your Supabase project):
-- `SUPABASE_PROJECT_REF` - Settings → General (e.g., "xyzcompanyorxyz")
-- `SUPABASE_ANON_KEY` - Settings → API → anon public
-- `SUPABASE_SERVICE_ROLE_KEY` - Settings → API → service_role
+- `SUPABASE_PROJECT_REF` - Project Settings → General → Project ID
+- `SUPABASE_ANON_KEY` - Project Settings → API → anon public
+- `SUPABASE_SERVICE_ROLE_KEY` - Project Settings → API → service_role secret
 - `SUPABASE_DB_PASSWORD` - The password you saved when creating the project
 - `SUPABASE_ACCESS_TOKEN` - The personal access token you created in step 2
 
 **Cloudflare Values**:
-- `CLOUDFLARE_ACCOUNT_ID` - Found in any Cloudflare dashboard page (right sidebar)
 - `CLOUDFLARE_API_TOKEN` - Create one following these steps:
   1. Go to [My Profile → API Tokens](https://dash.cloudflare.com/profile/api-tokens)
   2. Click "Create Token"
   3. Use "Custom token" template
   4. Set permissions:
      - Account → Cloudflare Pages:Edit
-     - Account → Account Settings:Read (for account ID verification)
+     - Account → Account Settings:Read (for deployment operations)
   5. Set Account Resources: Include → Your account
   6. Click "Continue to summary" → "Create Token"
-  7. **IMPORTANT**: Copy the token immediately (you won't see it again!)
+  7. **IMPORTANT**: Copy the token secret immediately (it's only shown once!)
 - `CLOUDFLARE_PROJECT_NAME` - Choose a name for your project (e.g., "my-app")
 
 **OpenAI Values**:
