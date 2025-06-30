@@ -33,12 +33,14 @@ A Claude Code-optimized template for rapidly building full-stack web application
 
 ## Quick Start
 
-### 1. Clone Repository
+### 1. Create a new repo from the template
 
-```bash
-git clone https://github.com/technodome-aif/genai-starter
-cd genai-starter
-```
+1. Go to https://github.com/technodome-aif/genai-starter and click **"Use this template"** → **"Create a new repository"**
+2. Clone your new repository:
+   ```bash
+   git clone https://github.com/<your-username>/<your-repo-name>.git
+   cd <your-repo-name>
+   ```
 
 ### 2. Create Supabase Project and Cloudflare Account
 
