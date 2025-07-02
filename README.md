@@ -82,7 +82,7 @@ Edit `env.config` and fill in your credentials:
   5. **Zone Resources**: Include → All zones
   6. Click "Continue to summary" → "Create Token"
   7. **IMPORTANT**: Copy the token secret immediately (it's only shown once!)
-- `CLOUDFLARE_PROJECT_NAME` - Choose a name for your project (e.g., "my-app")
+- `CLOUDFLARE_PROJECT_NAME` - Choose a name for your project (e.g., "my-app") - this will be used in your deployment URL
 
 **OpenAI Values**:
 - `OPENAI_API_KEY` - Get from [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
