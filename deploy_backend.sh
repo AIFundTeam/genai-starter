@@ -77,6 +77,5 @@ for func in $FUNCTIONS; do
 done
 
 echo -e "\n${GREEN}Next steps:${NC}"
-echo "1. Test your functions using the URLs above"
-echo "2. Deploy frontend with: ./deploy_frontend.sh"
-echo "3. Monitor logs in Supabase dashboard"
+echo "See README.md section 7 for testing instructions"
+echo "Deploy frontend with: ./deploy_frontend.sh"

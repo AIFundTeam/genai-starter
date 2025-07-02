@@ -100,7 +100,4 @@ fi
 
 echo ""
 echo -e "${GREEN}Next steps:${NC}"
-echo "1. Visit your deployed app"
-echo "2. Run the test suite to verify setup"
-echo "3. Monitor logs in Cloudflare dashboard"
-echo "4. Set up custom domain if needed"
+echo "See README.md section 7 for testing instructions"
