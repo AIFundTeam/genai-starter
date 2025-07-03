@@ -130,7 +130,7 @@ The LLM test verifies your OpenAI API key is working. If it fails:
 2. Make sure you ran `./deploy_backend.sh` after setting up
 3. Verify the secret was set: `supabase secrets list`
 
-Once all tests pass, you'll see "🎉 All Tests Passed!" and you're ready to build.
+Once all tests pass, you'll see "🎉 All Tests Passed!" and you're ready to customize your app.
 
 ### Troubleshooting Test Failures
 
