@@ -8,11 +8,21 @@ set -e  # Exit on error
 
 echo "🗄️  Setting up database schema..."
 
-# Check if environment is loaded
+# Auto-source setup-env.sh if env.config exists and environment variables are not set
 if [ -z "$SUPABASE_PROJECT_REF" ] || [ -z "$SUPABASE_DB_PASSWORD" ]; then
-    echo "❌ Environment variables not loaded"
-    echo "Please run: source setup-env.sh [dev|prod]"
-    exit 1
+    if [ -f "env.config" ]; then
+        echo "⚠️  Environment variables not set. Auto-sourcing setup-env.sh..."
+        source setup-env.sh
+        if [ -z "$SUPABASE_PROJECT_REF" ] || [ -z "$SUPABASE_DB_PASSWORD" ]; then
+            echo "❌ Failed to load environment variables!"
+            echo "Please check your env.config file"
+            exit 1
+        fi
+    else
+        echo "❌ Environment variables not set and env.config not found!"
+        echo "Please create env.config from env.config.template and fill in your values"
+        exit 1
+    fi
 fi
 
 # Check if supabase CLI is installed
@@ -42,12 +52,7 @@ echo "   - items"
 echo ""
 echo "This is safe for development but will DELETE ALL DATA."
 echo ""
-read -p "Continue? (y/N) " -n 1 -r
-echo ""
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    echo "Cancelled."
-    exit 0
-fi
+echo "Proceeding automatically..."
 
 # Reset migrations directory
 echo "Preparing migrations..."
@@ -61,7 +66,7 @@ cp sql/schema.sql "$MIGRATION_FILE"
 
 # Reset the remote database and apply our migration
 echo "Resetting remote database..."
-PGPASSWORD="$SUPABASE_DB_PASSWORD" supabase db reset --linked --no-seed
+echo "y" | PGPASSWORD="$SUPABASE_DB_PASSWORD" supabase db reset --linked --no-seed
 
 if [ $? -eq 0 ]; then
     echo ""

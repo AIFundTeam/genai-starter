@@ -13,17 +13,21 @@ FRONTEND_DIR="frontend"
 echo -e "${YELLOW}=== Cloudflare Pages Deployment ===${NC}"
 echo ""
 
-# Check if environment variables are set
-if [ -z "$CLOUDFLARE_PROJECT_NAME" ]; then
-    echo -e "${RED}Error: Cloudflare environment not set!${NC}"
-    echo "Please run: source setup-env.sh"
-    exit 1
-fi
-
-if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
-    echo -e "${RED}Error: Supabase environment variables not set!${NC}"
-    echo "Please run: source setup-env.sh"
-    exit 1
+# Auto-source setup-env.sh if env.config exists and environment variables are not set
+if [ -z "$CLOUDFLARE_PROJECT_NAME" ] || [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+    if [ -f "env.config" ]; then
+        echo -e "${YELLOW}Environment variables not set. Auto-sourcing setup-env.sh...${NC}"
+        source setup-env.sh
+        if [ -z "$CLOUDFLARE_PROJECT_NAME" ] || [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo -e "${RED}Error: Failed to load environment variables!${NC}"
+            echo "Please check your env.config file"
+            exit 1
+        fi
+    else
+        echo -e "${RED}Error: Environment variables not set and env.config not found!${NC}"
+        echo "Please create env.config from env.config.template and fill in your values"
+        exit 1
+    fi
 fi
 
 echo -e "${GREEN}Deploying to Cloudflare Pages project: ${CLOUDFLARE_PROJECT_NAME}${NC}"
