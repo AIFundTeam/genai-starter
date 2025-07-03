@@ -139,11 +139,7 @@ If any tests fail, here's how to debug with Claude Code:
 1. **Open browser developer tools** (F12 or right-click → Inspect)
 2. **Check the Console tab** for error messages
 3. **Copy the error messages** (right-click → "Copy message" or select and copy)
-4. **Open Claude Code** in your project directory:
-   ```bash
-   claude .
-   ```
-5. **Paste the errors** and ask Claude Code:
+4. **Paste the errors** and ask Claude Code:
    ```
    "I'm getting these console errors when running the setup tests:
    [paste your error messages here]
@@ -163,12 +159,15 @@ If any tests fail, here's how to debug with Claude Code:
 - Database connection problems
 - Edge function deployment issues
 
-## Build Your App with Claude Code
+## Using Claude Code
 
-Now that everything is set up and tested, open the project with Claude Code:
+Claude Code is Anthropic's AI-powered coding assistant that can help you build, debug, and enhance your applications. It understands your entire codebase and can write code, modify files, run commands, and deploy changes.
+
+To start using Claude Code with your project:
 
 ```bash
-claude .
+cd /path/to/your/project
+claude
 ```
 
 Examples of what to ask Claude Code:
