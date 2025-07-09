@@ -35,7 +35,7 @@ A Claude Code-optimized template for rapidly building full-stack web application
 
 ### 1. Create a new repo from the template
 
-1. Go to https://github.com/technodome-aif/genai-starter and click **"Use this template"** → **"Create a new repository"**
+1. Go to https://github.com/AIFundTeam/genai-starter and click **"Use this template"** → **"Create a new repository"**
 2. Clone your new repository and navigate to it:
    ```bash
    git clone <your-repo-url>
