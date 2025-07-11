@@ -114,6 +114,44 @@ window.SUPABASE_ANON_KEY = '${SUPABASE_ANON_KEY}';
 EOF
     echo -e "${GREEN}✅ frontend/env.js created${NC}"
     
+    # Generate .mcp.json for MCP servers
+    echo -e "\n${GREEN}Generating .mcp.json for MCP servers...${NC}"
+    
+    # Detect OS and set appropriate command
+    MCP_COMMAND="npx"
+    if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "win32" ]] || [[ "$OSTYPE" == "cygwin" ]]; then
+        MCP_COMMAND="npx.cmd"
+    fi
+    
+    cat > .mcp.json <<EOF
+{
+  "mcpServers": {
+    "supabase": {
+      "command": "${MCP_COMMAND}",
+      "args": [
+        "-y",
+        "@supabase/mcp-server-supabase@latest",
+        "--read-only",
+        "--project-ref=${SUPABASE_PROJECT_REF}"
+      ],
+      "env": {
+        "SUPABASE_ACCESS_TOKEN": "${SUPABASE_ACCESS_TOKEN}"
+      }
+    },
+    "puppeteer": {
+      "command": "${MCP_COMMAND}",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-puppeteer@latest"
+      ]
+    }
+  }
+}
+EOF
+    echo -e "${GREEN}✅ .mcp.json created with MCP servers configured${NC}"
+    echo -e "${YELLOW}   - Supabase MCP: Read-only access to your project${NC}"
+    echo -e "${YELLOW}   - Puppeteer MCP: Browser automation capabilities${NC}"
+    
     # Link Supabase project
     if command -v supabase &> /dev/null; then
         echo -e "\n${GREEN}Linking Supabase project...${NC}"

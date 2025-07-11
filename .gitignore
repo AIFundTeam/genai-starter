@@ -6,6 +6,7 @@ env.config
 
 # Generated files
 frontend/env.js
+.mcp.json
 
 # Dependencies
 node_modules/
