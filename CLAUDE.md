@@ -230,7 +230,7 @@ The template includes a pre-built `items` table as an example. When building a n
 
 The template includes a working OpenAI integration example in `test-llm` function:
 - Accepts a prompt and user_email
-- Calls OpenAI GPT-3.5-turbo
+- Calls OpenAI GPT-4.1
 - Returns the AI response
 - Handles errors gracefully
 

@@ -188,7 +188,7 @@ async function testLLM() {
         resultsDiv.innerHTML = `
             <div class="alert alert-success">
                 <strong>✅ LLM API:</strong> ${data.response}
-                <br><small>Response from OpenAI GPT-3.5</small>
+                <br><small>Response from OpenAI GPT-4.1</small>
             </div>
         `;
         testsPassed.llm = true;
