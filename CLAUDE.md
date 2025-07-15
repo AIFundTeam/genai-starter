@@ -33,6 +33,21 @@ source setup-env.sh
 supabase functions deploy <function-name> --project-ref $SUPABASE_PROJECT_REF
 ```
 
+## 🔧 MCP Tools for Enhanced Debugging
+
+This starter includes MCP tools in `.mcp.json` for closed-loop debugging:
+
+- **Supabase MCP**: Direct database access, real-time queries, server logs
+- **Puppeteer MCP**: UI testing, screenshots, frontend JavaScript console logs capture
+
+### Puppeteer Usage Notes
+
+**Important for Claude Code automation:**
+- **Don't over-wait**: Web page updates are fast - shorter wait times are usually sufficient
+- **Check login state**: The app remembers previous user login in localStorage. Always attempting to login is an automation failure mode - check if user is already logged in first
+
+These tools enable Claude Code to get immediate feedback on changes across the full stack for more productive development.
+
 ## ⚠️ Most Common Error
 
 **If you see "Missing Supabase configuration" or similar errors:**
