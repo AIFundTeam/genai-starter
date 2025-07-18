@@ -3,111 +3,108 @@
 This guide helps you set up all required tools on Windows for development with Claude Code. Don't worry if you're new to coding - we'll walk through each step together! 🎯
 
 ## Before You Start
-- **Time needed**: About 30 minutes
-- **What we're doing**: Setting up Linux tools on Windows (this makes coding easier!)
+- **Time needed**: About 15 minutes
+- **What we're doing**: Setting up Git Bash for Claude Code (simple and fast!)
 - **Tip**: Keep this guide open on your phone or another screen
 
-## Step 1: Install WSL (Windows Subsystem for Linux)
+## Step 1: Install Git for Windows
 
-### What is WSL?
-Think of WSL as a special app that lets Windows run Linux programs. It's like having two computers in one! Most coding tools work better with Linux, so this makes your life easier.
+### What is Git for Windows?
+Git for Windows includes Git Bash, which gives you a Unix-like terminal on Windows. This is perfect for running Claude Code and development tools.
 
-### Enable WSL
-1. **Open PowerShell as Administrator**
-   - Click the Start button (Windows logo)
-   - Type `powershell`
-   - You'll see "Windows PowerShell" appear - RIGHT-CLICK on it
-   - Click "Run as administrator"
+### Download and Install Git for Windows
+1. **Download Git for Windows**
+   - Go to [git-scm.com/downloads/win](https://git-scm.com/downloads/win)
+   - Click "Download for Windows"
+   - The download will start automatically
+
+2. **Run the Installer**
+   - Find the downloaded file (usually in your Downloads folder)
+   - Double-click to run it
    - If Windows asks "Do you want to allow this app to make changes?", click "Yes"
 
-2. **Install WSL**
-   - Copy and paste this command exactly:
+3. **Installation Options**
+   - **Important**: Use the default settings for everything
+   - Just keep clicking "Next" through all the screens
+   - The defaults are perfect for Claude Code!
+   - Click "Install" when you reach the final screen
+   - This will take 2-3 minutes
+
+4. **Verify Installation**
+   - After installation completes, click "Finish"
+   - You should see "Git Bash" in your Start menu
+
+## Step 2: Set Up Git Bash Path (If Needed)
+
+Most users won't need this step, but if you have a portable Git installation or Claude Code can't find Git Bash:
+
+1. **Open PowerShell**
+   - Press `Windows + R`
+   - Type `powershell` and press Enter
+
+2. **Set the Git Bash Path**
+   - Copy and paste this command:
    ```powershell
-   wsl --install
+   $env:CLAUDE_CODE_GIT_BASH_PATH="C:\Program Files\Git\bin\bash.exe"
    ```
    - Press Enter
-   - You'll see text scrolling by - this is normal! It's downloading Ubuntu Linux
-   - This might take 5-10 minutes depending on your internet speed
 
-3. **Restart your computer**
-   - Save any open work first!
-   - When WSL finishes installing, it will ask you to restart
-   - Click "Restart now" or restart manually
+## Step 3: Install Required Tools
 
-4. **Set up Ubuntu (After Restart)**
-   - Ubuntu will open automatically (black window with white text)
-   - If it doesn't open, search "Ubuntu" in the Start menu and click it
-   - It will ask you to create a username:
-     - Type a simple username (lowercase letters only, no spaces)
-     - Good examples: `john`, `mary`, `dev`
-     - Press Enter
-   - It will ask for a password:
-     - **IMPORTANT**: When you type your password, nothing will appear on screen - not even dots!
-     - This is a security feature - just type your password and press Enter
-     - Type it again when asked
-   - Write down your username and password somewhere safe!
+Now we'll install the coding tools using Git Bash. 
 
-## Step 2: Install Required Tools (in WSL)
+### Open Git Bash
+1. Click the Start button (Windows logo)
+2. Type `git bash`
+3. Click on "Git Bash" when it appears
+4. You'll see a black window with a command prompt
 
-Now we'll install the coding tools. Don't worry about understanding what each tool does - just follow along!
+**📌 Important**: Use Git Bash (not PowerShell or Command Prompt) for all the following steps!
 
-**📌 Important**: Make sure you're in the Ubuntu window (black background) for all these steps, NOT PowerShell!
+### Install Node.js
+We'll use the Windows installer for Node.js:
 
-### First, Update Ubuntu
-This makes sure Ubuntu has the latest security updates:
-```bash
-sudo apt update && sudo apt upgrade -y
-```
-- When you type `sudo`, it will ask for your password
-- Remember: nothing appears when you type your password!
-- This might take a few minutes
+1. **Download Node.js**
+   - Go to [nodejs.org](https://nodejs.org)
+   - Click "Download Node.js (LTS)" - this gets the stable version
+   - Run the downloaded installer
+   - Use all default settings (just click "Next" through everything)
 
-### Install Node.js (JavaScript Tool)
-We'll use the easier method that works best in 2024:
+2. **Verify Node.js Installation**
+   - Close and reopen Git Bash (important!)
+   - Type this command:
+   ```bash
+   node --version
+   ```
+   - You should see something like `v20.x.x` or higher
+
+### Install Supabase CLI
+Supabase helps manage your app's data:
 
 ```bash
-# First, install Node.js from Ubuntu's repository
-sudo apt install nodejs npm -y
-```
-
-This installs an older but stable version of Node.js, which is perfect for getting started.
-
-### Install Supabase CLI (Database Tool)
-Supabase helps manage your app's data. Let's install it:
-
-```bash
-# Install using npm (now that we have Node.js)
 npm install -g supabase
 ```
 
-If you see warnings about permissions, that's okay - the tool should still work!
-
-### Install Cloudflare Wrangler (Website Publishing Tool)
+### Install Cloudflare Wrangler
 This tool helps put your website on the internet:
 
 ```bash
 npm install -g wrangler
 ```
 
-### Install Git (Code History Tool)
-Git helps you save your work and collaborate:
-```bash
-sudo apt install git -y
-```
+## Step 4: Verify Everything Works
 
-## Step 3: Verify Everything Works
-
-Let's check that all tools installed correctly. Copy and paste each command:
+Let's check that all tools installed correctly. Copy and paste each command in Git Bash:
 
 ```bash
 node --version
 ```
-✅ You should see something like `v18.x.x` or higher
+✅ You should see something like `v20.x.x` or higher
 
 ```bash
 npm --version
 ```
-✅ You should see a version number like `9.x.x` or higher
+✅ You should see a version number like `10.x.x` or higher
 
 ```bash
 supabase --version
@@ -125,38 +122,24 @@ git --version
 ✅ You should see `git version 2.x.x`
 
 **Having issues?** If any command shows "command not found", try:
-1. Close the Ubuntu window
+1. Close Git Bash
 2. Open it again
 3. Try the command again
 
 If it still doesn't work, that's okay! Claude Code can help you troubleshoot.
 
-## Step 4: Working with Your Files
+## Step 5: Ready for Claude Code!
 
-### Understanding File Locations
-When using WSL, you have two places to store files:
-
-1. **Linux Home Folder** (Recommended) ✅
-   - Location: `/home/yourusername/`
-   - This is where you should work on your code
-   - It's faster and more reliable
-
-2. **Windows Files** (If needed)
-   - Location: `/mnt/c/Users/YourWindowsUsername/`
-   - Use this to access files from your Windows desktop or documents
-
-### Ready for Claude Code!
-
-Now that you have WSL set up, you're ready to use Claude Code - Anthropic's AI coding assistant that runs right in your terminal!
+Now that you have Git Bash set up, you're ready to use Claude Code - Anthropic's AI coding assistant that runs right in your terminal!
 
 **What's Claude Code?**
 - It's an AI assistant that helps you write code
-- It runs in your Ubuntu terminal
+- It runs in your Git Bash terminal
 - It can create entire applications, fix bugs, and explain code
 - Learn more at [anthropic.com/claude-code](https://www.anthropic.com/claude-code)
 
 **Next Steps:**
-1. Make sure you're in the Ubuntu terminal
+1. Make sure you're in Git Bash
 2. Navigate to where you want to create your project:
    ```bash
    cd ~  # This goes to your home folder
@@ -171,38 +154,31 @@ Now that you have WSL set up, you're ready to use Claude Code - Anthropic's AI c
 
 ### Common Issues and Solutions
 
-#### ❌ "wsl --install" doesn't work
-**Solution:**
-1. Make sure you're running PowerShell as Administrator (right-click → Run as administrator)
-2. Check your Windows version:
-   - Press `Windows + R`
-   - Type `winver` and press Enter
-   - You need Windows 10 version 2004 or higher, or Windows 11
-3. If you have an older Windows version, you'll need to update Windows first
-
-#### ❌ Ubuntu doesn't open after restart
-**Solution:**
-- Click the Start button and search for "Ubuntu"
-- Click on the Ubuntu app when it appears
-- If that doesn't work, open PowerShell and type `wsl`
-
 #### ❌ "Command not found" errors
 **What to check:**
-- Make sure you're in Ubuntu (black window), NOT PowerShell (blue window)
-- The Ubuntu prompt looks like: `yourname@computer:~$`
-- The PowerShell prompt looks like: `PS C:\>`
+- Make sure you're in Git Bash (black window), NOT PowerShell (blue window) or Command Prompt
+- The Git Bash prompt looks like: `MINGW64 /c/Users/YourName`
+- Close and reopen Git Bash after installing Node.js
 
-#### ❌ Password not working
-**Remember:**
-- When typing your password in Ubuntu, nothing appears on screen (not even dots!)
-- Just type your password carefully and press Enter
-- If you forgot your password, you'll need to reset WSL (ask Claude Code for help)
-
-#### ❌ Permission denied errors
+#### ❌ Git Bash won't open
 **Solution:**
-- Add `sudo` before the command
-- Example: If `apt update` fails, try `sudo apt update`
-- It will ask for your password
+- Search for "Git Bash" in the Start menu
+- If you can't find it, reinstall Git for Windows
+- Make sure you didn't skip the installation
+
+#### ❌ Node.js commands don't work
+**Solution:**
+- Make sure you installed Node.js from nodejs.org
+- Close and reopen Git Bash after installing Node.js
+- Try running the installer again if needed
+
+#### ❌ Claude Code can't find Git Bash
+**Solution:**
+- Set the environment variable in PowerShell:
+  ```powershell
+  $env:CLAUDE_CODE_GIT_BASH_PATH="C:\Program Files\Git\bin\bash.exe"
+  ```
+- If Git is installed elsewhere, adjust the path accordingly
 
 ### Getting More Help
 
@@ -212,27 +188,25 @@ Now that you have WSL set up, you're ready to use Claude Code - Anthropic's AI c
 3. Claude Code can provide specific solutions for your exact problem!
 
 **Alternative help options:**
-- Search your error message on Google (often someone else had the same issue!)
-- The friendly folks at [r/bashonubuntuonwindows](https://reddit.com/r/bashonubuntuonwindows) on Reddit
-- Microsoft's official [WSL documentation](https://docs.microsoft.com/windows/wsl/)
+- Search your error message on Google
+- Git for Windows documentation: [git-scm.com/doc](https://git-scm.com/doc)
 
 ## Next Steps
 
 ### 🎉 Congratulations!
 You've successfully set up your Windows computer for development! Here's what you accomplished:
-- ✅ Installed WSL (Linux on Windows)
-- ✅ Set up Ubuntu with your own username and password
-- ✅ Installed all the development tools
-- ✅ Got VS Code ready for coding
+- ✅ Installed Git for Windows with Git Bash
+- ✅ Installed Node.js and npm
+- ✅ Installed development tools (Supabase CLI, Wrangler)
+- ✅ Got everything ready for Claude Code
 
 ### 📍 What's Next?
 Now you're ready to build your app! Continue with the [Quick Start guide in README.md](./README.md#quick-start)
 
 ### 🔑 Key Things to Remember:
-1. **Always use Ubuntu terminal** for running commands (not PowerShell)
-2. **Your password is invisible** when typing in Ubuntu (security feature)
-3. **Claude Code runs in your terminal** - no need for a separate editor
-4. **Keep your username and password** written down somewhere safe
+1. **Always use Git Bash** for running commands (not PowerShell or Command Prompt)
+2. **Claude Code runs in your terminal** - no need for a separate editor
+3. **Git Bash is your friend** - it's where all the magic happens
 
 ### 💪 You Did It!
 Setting up a development environment is often the hardest part - and you just completed it! From here on, Claude Code will help you build amazing things.
