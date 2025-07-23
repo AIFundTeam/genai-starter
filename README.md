@@ -25,6 +25,7 @@ A Claude Code-optimized template for rapidly building full-stack web application
 ## Prerequisites
 
 - **[Claude Code](https://www.anthropic.com/claude-code)** - Your AI coding assistant (required)
+  - Install Node.js 18+, then run: `npm install -g @anthropic-ai/claude-code`
 - [OpenAI Account](https://platform.openai.com) with API key (required)
 - [Supabase Account](https://supabase.com) (free tier works)
 - [Cloudflare Account](https://cloudflare.com) (free tier works)
