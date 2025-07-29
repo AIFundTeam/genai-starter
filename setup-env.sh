@@ -115,42 +115,37 @@ EOF
     echo -e "${GREEN}✅ frontend/env.js created${NC}"
     
     # Generate .mcp.json for MCP servers
-    echo -e "\n${GREEN}Generating .mcp.json for MCP servers...${NC}"
-    
-    # Detect OS and set appropriate command
-    MCP_COMMAND="npx"
-    if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "win32" ]] || [[ "$OSTYPE" == "cygwin" ]]; then
-        MCP_COMMAND="npx.cmd"
+    if [ ! -f ".mcp.json" ]; then
+        echo -e "\n${GREEN}Generating .mcp.json from template...${NC}"
+        
+        # Detect OS and set appropriate command
+        MCP_COMMAND="npx"
+        if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "win32" ]] || [[ "$OSTYPE" == "cygwin" ]]; then
+            MCP_COMMAND="npx.cmd"
+        fi
+        
+        # Copy template and substitute variables
+        cp .mcp.json.template .mcp.json
+        
+        # Use sed to replace placeholders
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            # macOS requires -i '' for in-place editing
+            sed -i '' "s|\${MCP_COMMAND}|${MCP_COMMAND}|g" .mcp.json
+            sed -i '' "s|\${SUPABASE_PROJECT_REF}|${SUPABASE_PROJECT_REF}|g" .mcp.json
+            sed -i '' "s|\${SUPABASE_ACCESS_TOKEN}|${SUPABASE_ACCESS_TOKEN}|g" .mcp.json
+        else
+            # Linux and Git Bash
+            sed -i "s|\${MCP_COMMAND}|${MCP_COMMAND}|g" .mcp.json
+            sed -i "s|\${SUPABASE_PROJECT_REF}|${SUPABASE_PROJECT_REF}|g" .mcp.json
+            sed -i "s|\${SUPABASE_ACCESS_TOKEN}|${SUPABASE_ACCESS_TOKEN}|g" .mcp.json
+        fi
+        
+        echo -e "${GREEN}✅ .mcp.json created from template with MCP servers configured${NC}"
+        echo -e "${YELLOW}   - Supabase MCP: Read-only access to your project${NC}"
+        echo -e "${YELLOW}   - Puppeteer MCP: Browser automation capabilities${NC}"
+    else
+        echo -e "\n${GREEN}.mcp.json already exists - preserving user customizations${NC}"
     fi
-    
-    cat > .mcp.json <<EOF
-{
-  "mcpServers": {
-    "supabase": {
-      "command": "${MCP_COMMAND}",
-      "args": [
-        "-y",
-        "@supabase/mcp-server-supabase@latest",
-        "--read-only",
-        "--project-ref=${SUPABASE_PROJECT_REF}"
-      ],
-      "env": {
-        "SUPABASE_ACCESS_TOKEN": "${SUPABASE_ACCESS_TOKEN}"
-      }
-    },
-    "puppeteer": {
-      "command": "${MCP_COMMAND}",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-puppeteer@latest"
-      ]
-    }
-  }
-}
-EOF
-    echo -e "${GREEN}✅ .mcp.json created with MCP servers configured${NC}"
-    echo -e "${YELLOW}   - Supabase MCP: Read-only access to your project${NC}"
-    echo -e "${YELLOW}   - Puppeteer MCP: Browser automation capabilities${NC}"
     
     # Link Supabase project
     if command -v supabase &> /dev/null; then

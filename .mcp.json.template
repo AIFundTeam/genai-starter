@@ -1,18 +1,18 @@
 {
   "mcpServers": {
     "supabase": {
-      "command": "npx",
+      "command": "${MCP_COMMAND}",
       "args": [
         "-y",
         "@supabase/mcp-server-supabase@latest",
-        "--project-ref=your-project-ref-here"
+        "--project-ref=${SUPABASE_PROJECT_REF}"
       ],
       "env": {
-        "SUPABASE_ACCESS_TOKEN": "your-personal-access-token-here"
+        "SUPABASE_ACCESS_TOKEN": "${SUPABASE_ACCESS_TOKEN}"
       }
     },
     "puppeteer": {
-      "command": "npx",
+      "command": "${MCP_COMMAND}",
       "args": [
         "-y",
         "@modelcontextprotocol/server-puppeteer@latest"
