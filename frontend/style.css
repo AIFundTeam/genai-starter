@@ -206,107 +206,26 @@ main {
     color: var(--text-secondary);
 }
 
-/* App Layout */
-.app-container {
-    display: flex;
-    gap: 2rem;
-    max-width: 1400px;
+/* Welcome Section */
+.welcome-section {
+    text-align: center;
+    padding: 3rem 0;
+    max-width: 600px;
     margin: 0 auto;
 }
 
-.sidebar {
-    width: 250px;
-    background-color: var(--surface);
-    padding: 1.5rem;
-    border-radius: 0.5rem;
-    box-shadow: var(--shadow);
-    height: fit-content;
-    position: sticky;
-    top: 2rem;
-}
-
-.sidebar-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.nav-link {
-    display: block;
-    padding: 0.75rem 1rem;
-    color: var(--text-secondary);
-    text-decoration: none;
-    border-radius: 0.375rem;
-    transition: all 0.2s;
-}
-
-.nav-link:hover {
-    background-color: var(--background);
+.welcome-section h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
     color: var(--text-primary);
 }
 
-.nav-link.active {
-    background-color: var(--primary-color);
-    color: white;
-}
-
-.content {
-    flex: 1;
-    background-color: var(--surface);
-    padding: 2rem;
-    border-radius: 0.5rem;
-    box-shadow: var(--shadow);
-}
-
-.content-section {
-    display: none;
-}
-
-.content-section.active {
-    display: block;
-}
-
-.section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-}
-
-/* Stats Grid */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-}
-
-.stat-card {
-    background-color: var(--background);
-    padding: 1.5rem;
-    border-radius: 0.5rem;
-    text-align: center;
-}
-
-.stat-card h3 {
-    font-size: 0.875rem;
+.welcome-section p {
+    font-size: 1.25rem;
     color: var(--text-secondary);
-    margin-bottom: 0.5rem;
-    text-transform: uppercase;
-}
-
-.stat-value {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--primary-color);
-}
-
-/* Actions */
-.actions {
-    display: flex;
-    gap: 1rem;
     margin-bottom: 2rem;
 }
+
 
 /* Test Results */
 .test-results {
@@ -315,48 +234,29 @@ main {
 
 /* Test Setup Styles */
 .test-setup {
-    background: var(--background);
-    padding: 0;
+    background: var(--surface);
+    padding: 2rem;
     border-radius: 8px;
     margin-top: 2rem;
+    border: 1px solid var(--border-color);
 }
 
-.collapsible-header {
-    width: 100%;
-    background: none;
-    border: 2px solid var(--border-color);
-    border-radius: 8px;
-    padding: 1rem 1.5rem;
+.test-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.test-header h3 {
     font-size: 1.5rem;
     font-weight: 600;
-    text-align: left;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
 }
 
-.collapsible-header:hover {
-    background: var(--surface);
-    border-color: var(--primary-color);
+.test-header p {
+    color: var(--text-secondary);
 }
 
-.collapsible-content {
-    padding: 2rem;
-    animation: slideDown 0.3s ease;
-}
-
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
 
 .test-grid {
     display: grid;
@@ -413,44 +313,32 @@ main {
     font-size: 1.25rem;
 }
 
-/* Items */
-.items-list {
-    display: grid;
-    gap: 1rem;
-}
-
-.item-card {
-    background-color: var(--background);
+.claude-code-guide {
+    background: rgba(255, 255, 255, 0.1);
     padding: 1.5rem;
-    border-radius: 0.5rem;
-    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    margin-top: 1rem;
+    text-align: left;
 }
 
-.item-card h4 {
-    margin-bottom: 0.5rem;
+.claude-code-guide code {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-family: 'Monaco', 'Menlo', monospace;
+    display: inline-block;
+    margin: 0.25rem 0;
 }
 
-.item-card p {
-    color: var(--text-secondary);
-    margin-bottom: 1rem;
+.claude-code-guide ul {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
 }
 
-.item-meta {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    margin-bottom: 1rem;
+.claude-code-guide li {
+    margin: 0.5rem 0;
 }
 
-.item-actions {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.empty-state {
-    text-align: center;
-    color: var(--text-secondary);
-    padding: 3rem;
-}
 
 /* Forms */
 .form-group {
@@ -635,22 +523,16 @@ footer p {
 
 /* Responsive */
 @media (max-width: 768px) {
-    .app-container {
-        flex-direction: column;
+    .welcome-section h2 {
+        font-size: 2rem;
     }
     
-    .sidebar {
-        width: 100%;
-        position: static;
-    }
-    
-    .sidebar-nav {
-        flex-direction: row;
-        overflow-x: auto;
+    .welcome-section p {
+        font-size: 1.125rem;
     }
     
     .feature-grid,
-    .stats-grid {
+    .test-grid {
         grid-template-columns: 1fr;
     }
     
