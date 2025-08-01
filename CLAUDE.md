@@ -18,7 +18,6 @@ This is a full-stack web application template built with:
 # Initial setup (run once)
 cp env.config.template env.config
 # Edit env.config with your Supabase and Cloudflare credentials
-source setup-env.sh
 
 # Database setup
 ./setup_database.sh
@@ -118,7 +117,7 @@ The template includes a comprehensive test section in the dashboard to verify:
 3. Edge functions (both public and user endpoints)
 4. LLM integration (tests OpenAI API connection)
 
-All tests must pass before building custom features. The OpenAI API key is automatically configured from setup-env.sh.
+All tests must pass before building custom features. The OpenAI API key is automatically configured by the deploy scripts.
 
 ### CRITICAL: The env.js File
 
@@ -345,10 +344,9 @@ The template includes a working OpenAI integration example in `test-llm` functio
 
 ### Deployment
 
-1. Always run `source setup-env.sh` before deploying
-2. Deploy backend first with `./deploy_backend.sh`
-3. Deploy frontend with `./deploy_frontend.sh`
-4. Monitor logs in Supabase and Cloudflare dashboards
+1. Deploy backend first with `./deploy_backend.sh` (automatically handles all setup)
+2. Deploy frontend with `./deploy_frontend.sh` (automatically handles all setup)
+3. Monitor logs in Supabase and Cloudflare dashboards
 
 ### Troubleshooting
 

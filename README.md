@@ -88,18 +88,7 @@ Edit `env.config` and fill in your credentials:
 **OpenAI Values**:
 - `OPENAI_API_KEY` - Get from [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
 
-### 4. Source Environment
-
-```bash
-source setup-env.sh  # This reads from env.config
-```
-
-This will:
-- Set all environment variables
-- Link your Supabase project
-- Generate `frontend/env.js` for deployment
-
-### 5. Setup Database
+### 4. Setup Database
 
 ```bash
 # Run the database setup (WARNING: drops existing tables!)
@@ -108,14 +97,21 @@ This will:
 
 **Important**: This script is idempotent but destructive - it drops and recreates all tables each time it runs. This ensures a clean state but will DELETE ALL DATA.
 
-### 6. Deploy
+### 5. Deploy
 
 ```bash
-./deploy_backend.sh      # Deploy Supabase Edge Functions
-./deploy_frontend.sh     # Deploy to Cloudflare Pages
+./deploy_backend.sh      # Deploy Supabase Edge Functions (automatically handles all setup)
+./deploy_frontend.sh     # Deploy to Cloudflare Pages (automatically handles all setup)
 ```
 
-### 7. Test Your Setup
+The deploy scripts automatically handle:
+- Loading environment variables from `env.config`
+- Linking your Supabase project
+- Generating `frontend/env.js` for the frontend
+- Creating `.mcp.json` for Claude Code MCP servers
+- Setting up all necessary configurations
+
+### 6. Test Your Setup
 
 After deploying, verify everything is working by visiting your Cloudflare Pages URL.
 
