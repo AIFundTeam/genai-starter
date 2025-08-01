@@ -50,55 +50,6 @@ async function testDatabase() {
     }
 }
 
-async function testPublicEndpoint() {
-    const resultsDiv = document.getElementById('test-results');
-    resultsDiv.innerHTML = '<p>⏳ Testing public API endpoint...</p>';
-    
-    try {
-        const data = await window.invokeEdgeFunction('hello-world', {
-            name: 'Test User'
-        });
-        
-        resultsDiv.innerHTML = `
-            <div class="alert alert-success">
-                <strong>✅ Public API:</strong> ${data.message}
-            </div>
-        `;
-        testsPassed.publicApi = true;
-        checkAllTests();
-    } catch (error) {
-        resultsDiv.innerHTML = `
-            <div class="alert alert-error">
-                <strong>❌ Public API Error:</strong> ${error.message}
-            </div>
-        `;
-    }
-}
-
-async function testProtectedEndpoint() {
-    const resultsDiv = document.getElementById('test-results');
-    resultsDiv.innerHTML = '<p>⏳ Testing user API endpoint...</p>';
-    
-    try {
-        const data = await window.invokeEdgeFunction('user-endpoint', {
-            user_email: window.getCurrentUser()
-        });
-        
-        resultsDiv.innerHTML = `
-            <div class="alert alert-success">
-                <strong>✅ User API:</strong> ${data.user} has ${data.itemCount} items
-            </div>
-        `;
-        testsPassed.protectedApi = true;
-        checkAllTests();
-    } catch (error) {
-        resultsDiv.innerHTML = `
-            <div class="alert alert-error">
-                <strong>❌ User API Error:</strong> ${error.message}
-            </div>
-        `;
-    }
-}
 
 async function testLLM() {
     const resultsDiv = document.getElementById('test-results');
