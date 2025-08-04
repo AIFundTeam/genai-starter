@@ -10,13 +10,6 @@
       "env": {
         "SUPABASE_ACCESS_TOKEN": "${SUPABASE_ACCESS_TOKEN}"
       }
-    },
-    "puppeteer": {
-      "command": "${MCP_COMMAND}",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-puppeteer@latest"
-      ]
     }
   }
 }
