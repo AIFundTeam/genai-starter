@@ -3,71 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome - My App</title>
-    <link rel="stylesheet" href="style.css">
+    <title>My App</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #f8fafc;
+            color: #64748b;
+        }
+        .loading {
+            text-align: center;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #2563eb;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
-    <!-- Header -->
-    <header>
-        <div class="container">
-            <div class="logo">
-                <h1>My App</h1>
-            </div>
-        </div>
-    </header>
+    <div class="loading">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
 
-    <!-- Main Content -->
-    <main class="container">
-        <div class="auth-container">
-            <div class="auth-card">
-                <h2>Welcome!</h2>
-                <p>Enter your email to get started with your full-stack app</p>
-                
-                <form id="login-form">
-                    <div class="form-group">
-                        <label for="email">Email Address</label>
-                        <input 
-                            type="email" 
-                            id="email" 
-                            name="email" 
-                            placeholder="you@example.com"
-                            required
-                            autofocus
-                        >
-                    </div>
-                    
-                    <button type="submit" class="btn btn-primary btn-block">
-                        Continue
-                    </button>
-                </form>
-                
-                <div class="auth-footer">
-                    <p>No password required - just enter your email to test your setup!</p>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- Scripts -->
     <script>
-        // Check if user is already logged in
+        // Route user based on login status
         const savedEmail = localStorage.getItem('userEmail');
+        
         if (savedEmail) {
-            window.location.href = 'test.html';
+            // User is logged in, redirect to main app
+            window.location.href = './app/';
+        } else {
+            // User not logged in, redirect to login
+            window.location.href = './login/';
         }
-
-        // Handle form submission
-        document.getElementById('login-form').onsubmit = function(e) {
-            e.preventDefault();
-            
-            const email = document.getElementById('email').value.trim();
-            if (email) {
-                // Save email to localStorage
-                localStorage.setItem('userEmail', email);
-                // Redirect to test page
-                window.location.href = 'test.html';
-            }
-        };
     </script>
 </body>
 </html>

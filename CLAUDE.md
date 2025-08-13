@@ -60,13 +60,23 @@ These tools enable Claude Code to get immediate feedback on changes across the f
 ```
 template/
 ├── frontend/               # Frontend application
-│   ├── index.html         # Main application (shows after login)
-│   ├── login.html         # Login page (email entry only, no password)
-│   ├── index.js           # Main app logic
-│   ├── user.js            # User management (email storage)
+│   ├── login/             # Login page
+│   │   ├── index.html     # Login page (email entry only, no password)
+│   │   ├── app.js         # Login logic with Shadow DOM
+│   │   └── css.js         # Login page styles
+│   ├── app/               # Main application
+│   │   ├── index.html     # Main app page (shows after login)
+│   │   ├── app.js         # Main app logic with Shadow DOM
+│   │   └── css.js         # Main app styles
+│   ├── test/              # Test/setup page
+│   │   ├── index.html     # Setup verification page
+│   │   ├── app.js         # Test logic with Shadow DOM
+│   │   └── css.js         # Test page styles
+│   ├── index.html         # Root redirect page
+│   ├── env.js             # Environment variables (generated)
 │   ├── supabase.js        # Supabase client
-│   ├── style.css          # Styles
-│   └── env.js             # Environment variables (generated)
+│   ├── user.js            # User management (email storage)
+│   └── logo.svg           # App logo
 ├── supabase/
 │   ├── functions/         # Edge functions
 │   │   ├── _shared/       # Shared utilities
@@ -87,28 +97,48 @@ template/
 ### Page Structure
 
 **Application Pages:**
-- `login.html` - Email entry page (users enter email, no password)
-- `index.html` - Main application (shows after user enters email)
+- `frontend/index.html` - Root redirect page (routes to login or app)
+- `frontend/login/` - Email entry page (users enter email, no password)
+- `frontend/app/` - Main application (shows after user enters email)
+- `frontend/test/` - Setup verification page (tests database, LLM integration)
 
 **User Flow:**
-1. User visits site → redirected to login.html if no email stored
-2. User enters email (no password required) → stored in localStorage
-3. User redirected to index.html (main app)
-4. All data is associated with user's email
+1. User visits site → root index.html routes based on localStorage
+2. If no email stored → redirect to `/login/`
+3. User enters email (no password required) → stored in localStorage
+4. User redirected to `/app/` (main app) or `/test/` (for setup verification)
+5. All data is associated with user's email
 
-## 📝 Frontend File Strategy
+## 📝 Frontend Development Strategy with Shadow DOM
 
-**IMPORTANT: Always modify existing files instead of creating new ones!**
+**IMPORTANT: Each page is organized in its own directory with Shadow DOM components!**
+
+### 🏗️ Shadow DOM Architecture
+
+Each page uses Shadow DOM for style encapsulation and modularity:
+- **`css.js`** - Exports styles as a template literal string
+- **`app.js`** - Custom element with Shadow DOM implementation  
+- **`index.html`** - Minimal HTML that loads the custom element
+
+### 📂 Page-Based Development
 
 When users ask you to build features:
-- ✅ **ALWAYS modify `index.html`** - This is the main app, put ALL features here
-- ✅ **ALWAYS modify `index.js`** - All JavaScript logic goes here
-- ✅ **NEVER create new HTML files** (no app.html, dashboard.html, etc.)
-- ✅ **NEVER create new JS files** (no app.js, utils.js, etc.)
+- ✅ **Modify existing page directories** (`/app/`, `/login/`, `/test/`)
+- ✅ **Edit the relevant `css.js`** for styling changes
+- ✅ **Edit the relevant `app.js`** for functionality
+- ✅ **Create new page directories** only when requested (e.g., `/dashboard/`, `/settings/`)
+- ✅ **Always use Shadow DOM pattern** for new pages
 - ✅ Update schema.sql for database changes
 - ✅ Create edge functions for backend logic
 
-**Why?** The template is designed as a single-page application. Creating new files breaks the routing and user management. Everything should be added to the existing index.html/js files.
+### 🎯 Where to Add Features
+
+- **Main App Features** → Modify `frontend/app/` directory
+- **Login/Auth Changes** → Modify `frontend/login/` directory  
+- **Testing/Setup** → Modify `frontend/test/` directory
+- **New Pages** → Create new directory with `index.html`, `app.js`, `css.js`
+
+**Why Shadow DOM?** Provides style encapsulation, prevents CSS conflicts, and makes components more modular and maintainable.
 
 **Test Setup Flow:**
 The template includes a comprehensive test section in the dashboard to verify:
@@ -174,47 +204,112 @@ window.SUPABASE_ANON_KEY = 'eyJ...';
    - Verify authentication in edge functions
    - Use admin client only when necessary
 
-### ⚠️ CRITICAL: Script Loading Order in HTML Files
+### ⚠️ CRITICAL: Script Loading Order with Shadow DOM
 
-**THIS IS THE #1 CAUSE OF ERRORS - env.js MUST BE LOADED FIRST!**
+**Shadow DOM pages have different script loading patterns:**
 
-Always include scripts in this exact order:
+**For pages that need Supabase (like `/test/`):**
 ```html
 <!-- At the bottom of your HTML file, before </body> -->
-<script src="env.js"></script>
+<script src="../env.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js"></script>
-<script src="user.js"></script>
-<script src="index.js"></script>  <!-- or your page-specific script -->
+<script src="../supabase.js"></script>
+<script src="../user.js"></script>
+<script type="module" src="./app.js"></script>  <!-- Your Shadow DOM component -->
+```
+
+**For simple pages (like `/login/` and `/app/`):**
+```html
+<!-- Minimal setup -->
+<script src="../env.js"></script>
+<script type="module" src="./app.js"></script>  <!-- Your Shadow DOM component -->
 ```
 
 **Why this order matters:**
-1. `env.js` - Sets up environment variables (MUST be first)
-2. Supabase CDN - Provides the Supabase library
-3. `supabase.js` - Creates the Supabase client
-4. `user.js` - Sets up user management
-5. Your app logic - Can now use everything above
+1. `../env.js` - Sets up environment variables (MUST be first)
+2. Supabase CDN - Provides the Supabase library (only if needed)
+3. `../supabase.js` - Creates the Supabase client (only if needed)  
+4. `../user.js` - Sets up user management (only if needed)
+5. `./app.js` - Your Shadow DOM component (type="module" for ES6 imports)
+
+### 🔧 Shadow DOM Component Pattern
+
+**Each page follows this structure:**
+
+**`css.js` - Styles Export:**
+```javascript
+export const styles = `
+  :host {
+    /* CSS custom properties */
+    --primary-color: #2563eb;
+    display: block;
+    /* Global styles for the component */
+  }
+  
+  /* Component styles... */
+`;
+```
+
+**`app.js` - Custom Element:**
+```javascript
+import { styles } from './css.js';
+
+class MyPageApp extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' });
+  }
+
+  connectedCallback() {
+    this.render();
+    this.initializeEventListeners();
+  }
+
+  render() {
+    this.shadowRoot.innerHTML = `
+      <style>${styles}</style>
+      <!-- Your HTML content -->
+    `;
+  }
+}
+
+customElements.define('my-page-app', MyPageApp);
+```
+
+**`index.html` - Page Entry Point:**
+```html
+<body>
+    <my-page-app></my-page-app>
+    <script src="../env.js"></script>
+    <script type="module" src="./app.js"></script>
+</body>
+```
 
 ### Adding New Features
 
-1. **New Page (rarely needed)**
-   - Most features should be added to index.html
-   - Only create new pages if specifically requested
-   - Update user.js routing if adding pages
+1. **New Page Directory**
+   - Create `/frontend/newpage/` directory
+   - Copy the Shadow DOM pattern above
+   - Follow the three-file structure: `index.html`, `app.js`, `css.js`
 
-2. **New Edge Function**
+2. **Modify Existing Page**
+   - Edit the appropriate `css.js` for styling changes
+   - Edit the appropriate `app.js` for functionality changes
+   - Shadow DOM keeps styles encapsulated
+
+3. **New Edge Function**
    - Create folder in supabase/functions/
    - Copy structure from hello-world or user-endpoint
    - Import CORS from _shared/cors.ts
    - Deploy with deploy_backend.sh
 
-3. **New Database Table**
+4. **New Database Table**
    - Add to sql/schema.sql
    - Include RLS policies
    - Add indexes for performance
    - Enable realtime if needed
 
-4. **Environment Variables**
+5. **Environment Variables**
    - Add to env.config
    - Document in README.md
    - Use in code via env.js (frontend) or Deno.env (backend)

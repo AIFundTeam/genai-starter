@@ -8,8 +8,8 @@ function initUser() {
         currentUser = savedEmail;
         updateUserDisplay();
     } else {
-        // Redirect to login page (now index.html)
-        window.location.href = 'index.html';
+        // Redirect to login page - let root handle routing
+        window.location.href = '/';
     }
 }
 
@@ -30,7 +30,7 @@ function updateUserDisplay() {
 window.logout = function() {
     localStorage.removeItem('userEmail');
     currentUser = null;
-    window.location.href = 'index.html';
+    window.location.href = '/';
 };
 
 // Get current user
