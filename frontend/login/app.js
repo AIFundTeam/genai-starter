@@ -20,7 +20,6 @@ class LoginApp extends HTMLElement {
       <header>
         <div class="container">
           <div class="logo">
-            <img src="../logo.svg" alt="Logo" width="32" height="32">
             <h1>App Template</h1>
           </div>
         </div>

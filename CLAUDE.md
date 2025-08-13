@@ -75,8 +75,7 @@ template/
 │   ├── index.html         # Root redirect page
 │   ├── env.js             # Environment variables (generated)
 │   ├── supabase.js        # Supabase client
-│   ├── user.js            # User management (email storage)
-│   └── logo.svg           # App logo
+│   └── user.js            # User management (email storage)
 ├── supabase/
 │   ├── functions/         # Edge functions
 │   │   ├── _shared/       # Shared utilities
