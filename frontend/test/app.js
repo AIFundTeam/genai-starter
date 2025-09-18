@@ -210,7 +210,7 @@ class TestApp extends HTMLElement {
       resultsDiv.innerHTML = `
         <div class="alert alert-success">
           <strong>✅ LLM API:</strong> ${data.response}
-          <br><small>Response from OpenAI GPT-4.1</small>
+          <br><small>Response from OpenAI GPT-5 via Responses API</small>
         </div>
       `;
       this.testsPassed.llm = true;

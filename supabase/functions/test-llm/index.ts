@@ -8,7 +8,26 @@ Deno.serve(async (req) => {
 
   try {
     // Parse request body
-    const { prompt = 'Hello', user_email = 'anonymous' } = await req.json();
+    let prompt = 'Hello';
+    let user_email = 'anonymous';
+
+    try {
+      const body = await req.json();
+      prompt = body.prompt || 'Hello';
+      user_email = body.user_email || 'anonymous';
+    } catch (jsonError) {
+      console.error('JSON parsing error:', jsonError);
+      return new Response(
+        JSON.stringify({
+          error: "Invalid JSON in request body",
+          message: jsonError.message,
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400,
+        }
+      );
+    }
     
     
     // Check for OpenAI API key
@@ -29,27 +48,20 @@ Deno.serve(async (req) => {
 
     console.log(`Calling OpenAI for user: ${user_email}, prompt: ${prompt}`);
 
-    // Call OpenAI API
-    const openaiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+    // Call OpenAI Responses API
+    const openaiResponse = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${openaiApiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-4.1",
-        messages: [
-          {
-            role: "system",
-            content: "You are a helpful assistant testing the full-stack template setup.",
-          },
-          {
-            role: "user",
-            content: prompt,
-          },
-        ],
-        max_tokens: 150,
-        temperature: 0.7,
+        model: "gpt-5",
+        input: `You are a helpful assistant testing the full-stack template setup. ${prompt}`,
+        max_output_tokens: 150,
+        reasoning: {
+          effort: "minimal"
+        }
       }),
     });
 
@@ -70,7 +82,28 @@ Deno.serve(async (req) => {
     }
 
     const data = await openaiResponse.json();
-    const response = data.choices[0].message.content;
+
+    // Parse responses API format
+    let response = "";
+
+    // Try the output_text helper first (if available)
+    if (data.output_text) {
+      response = data.output_text;
+    }
+    // Try the documented format: output[0] is message type, content[0] is output_text type
+    else if (data.output && data.output.length > 0) {
+      const messageOutput = data.output.find(item => item.type === 'message');
+      if (messageOutput && messageOutput.content && messageOutput.content.length > 0) {
+        const textContent = messageOutput.content.find(content => content.type === 'output_text');
+        if (textContent) {
+          response = textContent.text;
+        }
+      }
+    }
+
+    if (!response) {
+      response = "No text response found";
+    }
 
     // Return response
     return new Response(
