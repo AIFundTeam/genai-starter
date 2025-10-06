@@ -28,9 +28,64 @@ cp env.config.template env.config
 # Deploy frontend (Cloudflare Pages)
 ./deploy_frontend.sh
 
+# Run tests (ALWAYS run after making changes)
+./test_functions.sh
+
 # Deploy specific function
 supabase functions deploy <function-name> --project-ref $SUPABASE_PROJECT_REF
 ```
+
+## 🧪 Test-Driven Development (CRITICAL)
+
+**IMPORTANT: This template follows test-driven development principles.**
+
+### When Adding or Modifying Edge Functions:
+
+1. **Always create/update tests** in `supabase/functions/<function-name>/test.ts`
+2. **Focus on functional paths** - Test that the main feature works, not edge cases
+3. **Run tests after changes**: `./test_functions.sh`
+4. **Tests should validate**:
+   - ✅ Successful API calls with valid inputs
+   - ✅ Proper response structure
+   - ✅ CORS handling
+   - ❌ Skip: Complex edge cases, exhaustive error scenarios (this is a starter pack)
+
+### Test Pattern to Follow:
+
+```typescript
+// supabase/functions/your-function/test.ts
+import { assertEquals, assertExists } from "https://deno.land/std@0.224.0/assert/mod.ts";
+
+const FUNCTION_URL = Deno.env.get("TEST_FUNCTION_URL") || "http://localhost:54321/functions/v1/your-function";
+
+Deno.test("your-function: successful call with valid input", async () => {
+  const response = await fetch(FUNCTION_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ /* your test data */ }),
+  });
+
+  assertEquals(response.status, 200);
+  const data = await response.json();
+
+  // Validate response structure
+  assertEquals(data.success, true);
+  assertExists(data.result);
+
+  console.log("✅ Result:", data.result);
+});
+```
+
+### Update test_functions.sh:
+
+When adding new Edge Functions, update `test_functions.sh` to include your new tests:
+
+```bash
+# Add your function to the test runner
+deno test --allow-net --allow-env supabase/functions/your-function/test.ts
+```
+
+**Remember**: Every new Edge Function MUST have at least one test that validates the happy path.
 
 ## 🔧 MCP Tools for Enhanced Debugging
 
@@ -80,8 +135,7 @@ template/
 │   ├── functions/         # Edge functions
 │   │   ├── _shared/       # Shared utilities
 │   │   │   └── cors.ts    # CORS configuration
-│   │   ├── hello-world/   # Example public endpoint
-│   │   └── user-endpoint/  # Example user data endpoint
+│   │   └── test-llm/      # LLM integration endpoint
 │   └── config.toml        # Supabase configuration
 ├── sql/
 │   └── schema.sql         # Database schema
@@ -298,7 +352,7 @@ customElements.define('my-page-app', MyPageApp);
 
 3. **New Edge Function**
    - Create folder in supabase/functions/
-   - Copy structure from hello-world or user-endpoint
+   - Copy structure from test-llm
    - Import CORS from _shared/cors.ts
    - Deploy with deploy_backend.sh
 

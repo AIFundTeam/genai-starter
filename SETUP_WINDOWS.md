@@ -78,6 +78,22 @@ We'll use the Windows installer for Node.js:
    ```
    - You should see something like `v20.x.x` or higher
 
+### Install Deno
+Deno is the runtime for Edge Functions and testing:
+
+```bash
+# Install Deno using PowerShell (open PowerShell and run this)
+irm https://deno.land/install.ps1 | iex
+```
+
+After installation:
+1. Close PowerShell
+2. Close and reopen Git Bash
+3. Verify Deno installed:
+```bash
+deno --version
+```
+
 ### Install Supabase CLI
 Supabase helps manage your app's data:
 
@@ -105,6 +121,11 @@ node --version
 npm --version
 ```
 ✅ You should see a version number like `10.x.x` or higher
+
+```bash
+deno --version
+```
+✅ You should see Deno version info
 
 ```bash
 supabase --version

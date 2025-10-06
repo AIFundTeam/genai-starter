@@ -26,11 +26,14 @@ A Claude Code-optimized template for rapidly building full-stack web application
 
 - **[Claude Code](https://www.anthropic.com/claude-code)** - Your AI coding assistant (required)
   - Install Node.js 18+, then run: `npm install -g @anthropic-ai/claude-code`
+- **[Deno](https://deno.land)** - Runtime for Edge Functions and testing (required)
+  - Install: `curl -fsSL https://deno.land/install.sh | sh`
+  - Add to PATH: `export PATH="$HOME/.deno/bin:$PATH"` (add to ~/.zshrc or ~/.bashrc)
 - [OpenAI Account](https://platform.openai.com) with API key (required)
 - [Supabase Account](https://supabase.com) (free tier works)
 - [Cloudflare Account](https://cloudflare.com) (free tier works)
 
-**📝 For tool installation (Supabase CLI, Node.js, Git):** See [SETUP_MACOS.md](./SETUP_MACOS.md)
+**📝 For tool installation (Supabase CLI, Node.js, Deno, Git):** See [SETUP_MACOS.md](./SETUP_MACOS.md)
 
 ## Quick Start
 
@@ -216,16 +219,43 @@ python -m http.server 8000
 # Or use any static server like Live Server in VS Code
 ```
 
-### Test Edge Functions
+### Run Automated Tests
+
+This template uses test-driven development (TDD) to ensure code quality:
 
 ```bash
-# Public endpoint
-curl https://<project-ref>.supabase.co/functions/v1/hello-world
+# Run all Edge Function tests
+./test_functions.sh
+```
 
-# User endpoint (no auth required, just pass user email)
-curl https://<project-ref>.supabase.co/functions/v1/user-endpoint \
+The test suite validates:
+- ✅ **LLM Integration** - Makes real OpenAI API calls and verifies responses
+- ✅ **Error Handling** - Tests edge cases like missing prompts
+- ✅ **CORS Configuration** - Validates preflight requests work correctly
+
+Tests run against your deployed functions in Supabase, ensuring the full stack works end-to-end.
+
+**Test output example:**
+```
+🧪 Running Edge Function Tests
+Testing function URL: https://your-project.supabase.co/functions/v1/test-llm
+
+✅ test-llm: successful LLM call with valid prompt ... ok (664ms)
+✅ test-llm: handles missing prompt with default ... ok (1s)
+✅ test-llm: handles CORS preflight request ... ok (211ms)
+
+✅ All tests passed!
+```
+
+### Manual Testing with curl
+
+You can also test functions manually:
+
+```bash
+# Test LLM integration
+curl https://<project-ref>.supabase.co/functions/v1/test-llm \
   -H "Content-Type: application/json" \
-  -d '{"user_email": "user@example.com"}'
+  -d '{"prompt": "What is 2+2?", "user_email": "user@example.com"}'
 ```
 
 ### Directory Structure
@@ -240,8 +270,7 @@ curl https://<project-ref>.supabase.co/functions/v1/user-endpoint \
 │   └── style.css          # Styles
 ├── supabase/functions/    # Edge functions
 │   ├── _shared/           # Shared utilities
-│   ├── hello-world/       # Example endpoint
-│   └── user-endpoint/  # User data example
+│   └── test-llm/          # LLM integration endpoint
 ├── sql/                   # Database schema
 ├── deploy_*.sh           # Deployment scripts
 ├── setup-env.sh       # Environment setup script

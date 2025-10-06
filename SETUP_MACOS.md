@@ -17,6 +17,15 @@ After installation, follow the instructions to add Homebrew to your PATH.
 # Install Node.js (includes npm)
 brew install node
 
+# Install Deno (runtime for Edge Functions and testing)
+curl -fsSL https://deno.land/install.sh | sh
+
+# Add Deno to PATH (add this line to ~/.zshrc or ~/.bashrc)
+export PATH="$HOME/.deno/bin:$PATH"
+
+# Reload shell configuration
+source ~/.zshrc  # or source ~/.bashrc if using bash
+
 # Install Supabase CLI
 brew install supabase/tap/supabase
 
