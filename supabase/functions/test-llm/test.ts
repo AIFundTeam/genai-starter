@@ -1,21 +1,23 @@
 // Unit tests for test-llm Edge Function
 import { assertEquals, assertExists } from "https://deno.land/std@0.224.0/assert/mod.ts";
+import {
+  getFunctionUrl,
+  testFunction,
+  assertValidResponse,
+  testCorsPrefligh,
+  assertValidCors,
+  TEST_USER_EMAIL,
+} from "../_shared/test-utils.ts";
 
-const FUNCTION_URL = Deno.env.get("TEST_FUNCTION_URL") || "http://localhost:54321/functions/v1/test-llm";
+const FUNCTION_URL = getFunctionUrl("test-llm");
 
 Deno.test("test-llm: successful LLM call with valid prompt", async () => {
-  const response = await fetch(FUNCTION_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      prompt: "What is 2+2? Answer with just the number.",
-      user_email: "test@example.com",
-    }),
+  const response = await testFunction(FUNCTION_URL, {
+    prompt: "What is 2+2? Answer with just the number.",
+    user_email: TEST_USER_EMAIL,
   });
 
-  assertEquals(response.status, 200);
+  assertValidResponse(response, 200);
 
   const data = await response.json();
 
@@ -26,7 +28,7 @@ Deno.test("test-llm: successful LLM call with valid prompt", async () => {
   assertExists(data.timestamp);
 
   // Check user email is returned
-  assertEquals(data.user, "test@example.com");
+  assertEquals(data.user, TEST_USER_EMAIL);
 
   // Check that response contains actual content (not empty)
   assertEquals(typeof data.response, "string");
@@ -36,17 +38,11 @@ Deno.test("test-llm: successful LLM call with valid prompt", async () => {
 });
 
 Deno.test("test-llm: handles missing prompt with default", async () => {
-  const response = await fetch(FUNCTION_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      user_email: "test@example.com",
-    }),
+  const response = await testFunction(FUNCTION_URL, {
+    user_email: TEST_USER_EMAIL,
   });
 
-  assertEquals(response.status, 200);
+  assertValidResponse(response, 200);
 
   const data = await response.json();
   assertEquals(data.success, true);
@@ -54,23 +50,8 @@ Deno.test("test-llm: handles missing prompt with default", async () => {
 });
 
 Deno.test("test-llm: handles CORS preflight request", async () => {
-  const response = await fetch(FUNCTION_URL, {
-    method: "OPTIONS",
-    headers: {
-      "Access-Control-Request-Method": "POST",
-      "Access-Control-Request-Headers": "Content-Type",
-    },
-  });
+  const response = await testCorsPrefligh(FUNCTION_URL);
 
-  // Consume the response body to avoid leak detection
-  await response.text();
-
-  assertEquals(response.status, 200);
-
-  // Check CORS headers are present
-  const allowOrigin = response.headers.get("Access-Control-Allow-Origin");
-  const allowMethods = response.headers.get("Access-Control-Allow-Methods");
-
-  assertExists(allowOrigin);
-  assertExists(allowMethods);
+  assertValidResponse(response, 200, false); // CORS preflight doesn't return JSON
+  assertValidCors(response);
 });

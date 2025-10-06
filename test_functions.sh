@@ -37,14 +37,29 @@ if ! command -v deno &> /dev/null; then
 fi
 
 # Set test environment variables
-export TEST_FUNCTION_URL="https://${SUPABASE_PROJECT_REF}.supabase.co/functions/v1/test-llm"
+export SUPABASE_PROJECT_REF="$SUPABASE_PROJECT_REF"
 export OPENAI_API_KEY="$OPENAI_API_KEY"
 
-echo -e "${YELLOW}Testing function URL: ${TEST_FUNCTION_URL}${NC}"
+echo -e "${YELLOW}Finding test files...${NC}"
 echo ""
 
-# Run the tests
-deno test --allow-net --allow-env supabase/functions/test-llm/test.ts
+# Auto-discover test files in function directories
+TEST_FILES=$(find supabase/functions -name "test.ts" -type f | sort)
+
+if [ -z "$TEST_FILES" ]; then
+    echo -e "${RED}❌ No test files found!${NC}"
+    echo "Test files should be named 'test.ts' and located in function directories"
+    exit 1
+fi
+
+echo -e "${BLUE}Found test files:${NC}"
+echo "$TEST_FILES" | while read -r file; do
+    echo "  - $file"
+done
+echo ""
+
+# Run all discovered tests
+deno test --allow-net --allow-env $TEST_FILES
 
 # Check exit code
 if [ $? -eq 0 ]; then

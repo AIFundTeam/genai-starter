@@ -50,22 +50,45 @@ supabase functions deploy <function-name> --project-ref $SUPABASE_PROJECT_REF
    - ✅ CORS handling
    - ❌ Skip: Complex edge cases, exhaustive error scenarios (this is a starter pack)
 
-### Test Pattern to Follow:
+### Function Template:
+
+Use the template at `supabase/functions/_templates/function-template.ts` as a starting point for new functions:
+
+```bash
+# Copy the template to create a new function
+cp -r supabase/functions/_templates/function-template.ts supabase/functions/your-function/index.ts
+```
+
+The template includes:
+- TypeScript type definitions
+- Structured error handling with `AppError` class
+- CORS handling
+- Examples for both anonymous and admin Supabase clients
+- Proper response formatting
+
+### Test Pattern with Shared Utilities:
 
 ```typescript
 // supabase/functions/your-function/test.ts
 import { assertEquals, assertExists } from "https://deno.land/std@0.224.0/assert/mod.ts";
+import {
+  getFunctionUrl,
+  testFunction,
+  assertValidResponse,
+  testCorsPrefligh,
+  assertValidCors,
+  TEST_USER_EMAIL,
+} from "../_shared/test-utils.ts";
 
-const FUNCTION_URL = Deno.env.get("TEST_FUNCTION_URL") || "http://localhost:54321/functions/v1/your-function";
+const FUNCTION_URL = getFunctionUrl("your-function");
 
 Deno.test("your-function: successful call with valid input", async () => {
-  const response = await fetch(FUNCTION_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ /* your test data */ }),
+  const response = await testFunction(FUNCTION_URL, {
+    user_email: TEST_USER_EMAIL,
+    // your test data
   });
 
-  assertEquals(response.status, 200);
+  assertValidResponse(response, 200);
   const data = await response.json();
 
   // Validate response structure
@@ -74,16 +97,23 @@ Deno.test("your-function: successful call with valid input", async () => {
 
   console.log("✅ Result:", data.result);
 });
+
+Deno.test("your-function: handles CORS preflight", async () => {
+  const response = await testCorsPrefligh(FUNCTION_URL);
+  assertValidResponse(response, 200, false); // CORS doesn't return JSON
+  assertValidCors(response);
+});
 ```
 
-### Update test_functions.sh:
+### Auto-Discovery:
 
-When adding new Edge Functions, update `test_functions.sh` to include your new tests:
+`test_functions.sh` automatically discovers all `test.ts` files in function directories. Just create your test file and run:
 
 ```bash
-# Add your function to the test runner
-deno test --allow-net --allow-env supabase/functions/your-function/test.ts
+./test_functions.sh
 ```
+
+No need to manually update the test runner - it finds all tests automatically!
 
 **Remember**: Every new Edge Function MUST have at least one test that validates the happy path.
 

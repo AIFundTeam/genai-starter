@@ -116,226 +116,47 @@ The deploy scripts automatically handle:
 
 ### 6. Test Your Setup
 
-After deploying, verify everything is working by visiting your Cloudflare Pages URL.
+Visit your Cloudflare Pages URL and run the built-in tests on the dashboard to verify everything works. If anything fails, copy the error message and ask Claude Code to help debug.
 
-The template includes a **Test Your Setup** section on the dashboard that verifies:
-
-1. ✅ **Frontend** - Confirms deployment is working
-2. ✅ **Database** - Tests connection to PostgreSQL  
-3. ✅ **Edge Functions** - Tests both public and user APIs
-4. ✅ **LLM Integration** - Tests OpenAI API integration
-
-The LLM test verifies your OpenAI API key is working. If it fails:
-1. Check your API key is valid and has credits
-2. Make sure you ran `./deploy_backend.sh` after setting up
-3. Verify the secret was set: `supabase secrets list`
-
-Once all tests pass, you'll see "🎉 All Tests Passed!" and you're ready to customize your app.
-
-### Troubleshooting Test Failures
-
-If any tests fail, here's how to debug with Claude Code:
-
-1. **Open browser developer tools** (F12 or right-click → Inspect)
-2. **Check the Console tab** for error messages
-3. **Copy the error messages** (right-click → "Copy message" or select and copy)
-4. **Paste the errors** and ask Claude Code:
-   ```
-   "I'm getting these console errors when running the setup tests:
-   [paste your error messages here]
-   
-   Can you help me debug and fix this?"
-   ```
-
-**Additional debugging steps:**
-- **Network tab**: Check for failed API requests (red entries)
-- **Application tab**: Verify localStorage has `userEmail` set
-- **Sources tab**: Check if all JavaScript files are loading correctly
-
-**Common fixes Claude Code might suggest:**
-- Environment variable issues (`env.js` missing or incorrect)
-- API key problems (expired, invalid, or missing credits)
-- CORS configuration issues
-- Database connection problems
-- Edge function deployment issues
-
-## Using Claude Code
-
-Claude Code is Anthropic's AI-powered coding assistant that can help you build, debug, and enhance your applications. It understands your entire codebase and can write code, modify files, run commands, and deploy changes.
-
-To start using Claude Code with your project:
+## Start Building with Claude Code
 
 ```bash
 cd /path/to/your/project
 claude
 ```
 
-Examples of what to ask Claude Code:
+Tell Claude Code what you want to build:
 - "I want to build a task management app"
 - "Add a user profile system"
 - "Create a real-time chat feature"
-- "Implement file uploads"
-- "Add data export functionality"
 
-Claude Code will:
-- Update the database schema in `sql/schema.sql`
-- Modify the frontend UI in `index.html` and `index.js`
-- Add edge functions for your business logic
-- Implement features across the entire stack
-- Maintain consistency with the existing codebase
+Claude Code handles the database, backend, frontend, and tests. After schema changes, run `./setup_database.sh` to apply them.
 
-**Important**: After Claude Code modifies the schema, run `./setup_database.sh` again to apply the changes.
+## Common Issues
 
-## Development with Claude Code
+**Missing env.js?** Run `./deploy_frontend.sh`
 
-Claude Code is your AI pair programmer. Here are some examples:
+**401 errors?** Run `./deploy_backend.sh`
+
+**Database errors?** Run `./setup_database.sh`
+
+**OpenAI errors?** Check your API key has credits at [platform.openai.com](https://platform.openai.com)
+
+**Still stuck?** Copy the error and ask Claude Code: "Help me debug this error: [paste error]"
+
+## Development
+
+### Run Tests
 
 ```bash
-# Feature Development
-"Add a comments system to items with real-time updates"
-"Create a search functionality with full-text search"
-"Implement user notifications with email integration"
-
-# Debugging
-"Why is my authentication redirect not working?"
-"Help me debug this CORS error in my edge function"
-
-# Performance
-"Optimize the database queries for the dashboard"
-"Add caching to improve page load times"
-
-# Testing
-"Write tests for the authentication flow"
-"Create a test suite for my edge functions"
+./test_functions.sh  # Auto-discovers and runs all tests
 ```
 
-### Local Frontend Development
+### Local Development
 
 ```bash
-# Simple HTTP server (Python)
 cd frontend
-python -m http.server 8000
-
-# Or use any static server like Live Server in VS Code
-```
-
-### Run Automated Tests
-
-This template uses test-driven development (TDD) to ensure code quality:
-
-```bash
-# Run all Edge Function tests
-./test_functions.sh
-```
-
-The test suite validates:
-- ✅ **LLM Integration** - Makes real OpenAI API calls and verifies responses
-- ✅ **Error Handling** - Tests edge cases like missing prompts
-- ✅ **CORS Configuration** - Validates preflight requests work correctly
-
-Tests run against your deployed functions in Supabase, ensuring the full stack works end-to-end.
-
-**Test output example:**
-```
-🧪 Running Edge Function Tests
-Testing function URL: https://your-project.supabase.co/functions/v1/test-llm
-
-✅ test-llm: successful LLM call with valid prompt ... ok (664ms)
-✅ test-llm: handles missing prompt with default ... ok (1s)
-✅ test-llm: handles CORS preflight request ... ok (211ms)
-
-✅ All tests passed!
-```
-
-### Manual Testing with curl
-
-You can also test functions manually:
-
-```bash
-# Test LLM integration
-curl https://<project-ref>.supabase.co/functions/v1/test-llm \
-  -H "Content-Type: application/json" \
-  -d '{"prompt": "What is 2+2?", "user_email": "user@example.com"}'
-```
-
-### Directory Structure
-
-```
-├── frontend/               # Frontend application
-│   ├── login.html         # Email entry page
-│   ├── index.html         # Main application
-│   ├── index.js           # App logic
-│   ├── user.js            # User management
-│   ├── supabase.js        # Database client
-│   └── style.css          # Styles
-├── supabase/functions/    # Edge functions
-│   ├── _shared/           # Shared utilities
-│   └── test-llm/          # LLM integration endpoint
-├── sql/                   # Database schema
-├── deploy_*.sh           # Deployment scripts
-├── setup-env.sh       # Environment setup script
-└── env.config.template # Configuration template
-```
-
-## Customization
-
-### Building Your App - The Claude Code Way
-
-```bash
-# Build your main app
-"Build a project management app with tasks and deadlines"
-
-# Add features
-"Add a kanban board view to the tasks"
-
-# Add an edge function
-"Add an API endpoint to export user data as CSV"
-
-# Database changes
-"Add a tags system to items with many-to-many relationships"
-```
-
-Claude Code will handle:
-- Modifying index.html/js for your app
-- Creating edge functions
-- Adding RLS policies
-- Updating the schema
-- Maintaining consistency
-
-
-## Security Best Practices
-
-1. **Never commit** `env.config` (it's in .gitignore)
-2. **Use RLS policies** on all database tables (though open for this template)
-3. **Validate inputs** in edge functions
-4. **Keep API keys secure** - never expose in frontend code
-5. **Store secrets** in Supabase Edge Function secrets, not in code
-
-## Working with Claude Code
-
-### Best Practices
-
-1. **Be Specific** - Claude Code works best with clear, specific requests
-2. **Iterate Quickly** - Make small changes and test frequently
-3. **Use the CLAUDE.md** - It contains project-specific instructions
-4. **Trust the Assistant** - Claude Code understands the entire codebase
-5. **Document Your Vision First** - Before coding, write down what you hope to accomplish in a narrative document. Use this to align on goals with teammates. Often the alignment process is both time-consuming and the most important part of any project. Once this narrative document is locked down, Claude Code can often execute on it in a single pass.
-
-### Example Workflow
-
-```bash
-# Start a new feature
-claude "I need a blog system with markdown support"
-
-# Claude Code will:
-# 1. Create database tables for posts, categories, tags
-# 2. Add RLS policies for authorization
-# 3. Create edge functions for CRUD operations
-# 4. Build the frontend UI with markdown editor
-# 5. Set up real-time updates for comments
-
-# Review and deploy
-claude "Show me what changed and deploy to production"
+python -m http.server 8000  # Or use Live Server in VS Code
 ```
 
 ## Why This Stack?

@@ -58,7 +58,6 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         model: "gpt-5",
         input: `You are a helpful assistant testing the full-stack template setup. ${prompt}`,
-        max_output_tokens: 150,
         reasoning: {
           effort: "minimal"
         }
