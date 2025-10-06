@@ -44,7 +44,9 @@ echo -e "${YELLOW}Finding test files...${NC}"
 echo ""
 
 # Auto-discover test files in function directories
-TEST_FILES=$(find supabase/functions -name "test.ts" -type f | sort)
+# Finds both test.ts (integration) and *.test.ts (unit tests)
+# Excludes _templates directory
+TEST_FILES=$(find supabase/functions -name "test.ts" -o -name "*.test.ts" -type f | grep -v "_templates" | sort)
 
 if [ -z "$TEST_FILES" ]; then
     echo -e "${RED}❌ No test files found!${NC}"

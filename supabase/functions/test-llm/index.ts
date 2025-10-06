@@ -1,5 +1,7 @@
-// Test LLM integration - no authentication required
+// Test LLM integration - HTTP handler
+// Business logic is in logic.ts for testability
 import { corsHeaders, handleCors } from '../_shared/cors.ts';
+import { callLLM, LLMError } from './logic.ts';
 
 Deno.serve(async (req) => {
   // Handle CORS preflight
@@ -28,99 +30,37 @@ Deno.serve(async (req) => {
         }
       );
     }
-    
-    
-    // Check for OpenAI API key
-    const openaiApiKey = Deno.env.get("OPENAI_API_KEY");
-    if (!openaiApiKey) {
-      console.log('OpenAI API key not found');
-      return new Response(
-        JSON.stringify({
-          error: "OpenAI API key not configured",
-          message: "Please set OPENAI_API_KEY in your Supabase Edge Function secrets",
-        }),
-        {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 500,
-        }
-      );
-    }
 
-    console.log(`Calling OpenAI for user: ${user_email}, prompt: ${prompt}`);
-
-    // Call OpenAI Responses API
-    const openaiResponse = await fetch("https://api.openai.com/v1/responses", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${openaiApiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "gpt-5",
-        input: `You are a helpful assistant testing the full-stack template setup. ${prompt}`,
-        reasoning: {
-          effort: "minimal"
-        }
-      }),
-    });
-
-    if (!openaiResponse.ok) {
-      const error = await openaiResponse.text();
-      console.error('OpenAI API error:', error);
-      return new Response(
-        JSON.stringify({
-          error: "OpenAI API error",
-          details: error,
-          message: "Check your OpenAI API key and billing status",
-        }),
-        {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: openaiResponse.status,
-        }
-      );
-    }
-
-    const data = await openaiResponse.json();
-
-    // Parse responses API format
-    let response = "";
-
-    // Try the output_text helper first (if available)
-    if (data.output_text) {
-      response = data.output_text;
-    }
-    // Try the documented format: output[0] is message type, content[0] is output_text type
-    else if (data.output && data.output.length > 0) {
-      const messageOutput = data.output.find(item => item.type === 'message');
-      if (messageOutput && messageOutput.content && messageOutput.content.length > 0) {
-        const textContent = messageOutput.content.find(content => content.type === 'output_text');
-        if (textContent) {
-          response = textContent.text;
-        }
-      }
-    }
-
-    if (!response) {
-      response = "No text response found";
-    }
+    // Call business logic
+    const result = await callLLM({ prompt, user_email });
 
     // Return response
     return new Response(
-      JSON.stringify({
-        success: true,
-        response,
-        user: user_email,
-        timestamp: new Date().toISOString(),
-      }),
+      JSON.stringify(result),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       }
     );
-    
+
   } catch (error) {
     console.error('Error in test-llm function:', error);
-    
+
+    // Handle business logic errors
+    if (error instanceof LLMError) {
+      return new Response(
+        JSON.stringify({
+          error: error.message,
+          code: error.code,
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: error.statusCode,
+        }
+      );
+    }
+
+    // Handle unexpected errors
     return new Response(
       JSON.stringify({
         error: 'Internal server error',

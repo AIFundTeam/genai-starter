@@ -50,21 +50,61 @@ supabase functions deploy <function-name> --project-ref $SUPABASE_PROJECT_REF
    - ✅ CORS handling
    - ❌ Skip: Complex edge cases, exhaustive error scenarios (this is a starter pack)
 
-### Function Template:
+### Function Template - Testable Architecture:
 
-Use the template at `supabase/functions/_templates/function-template.ts` as a starting point for new functions:
+**IMPORTANT**: Separate business logic from HTTP handling for better testability.
+
+**Create a new function with this structure:**
 
 ```bash
-# Copy the template to create a new function
-cp -r supabase/functions/_templates/function-template.ts supabase/functions/your-function/index.ts
+# Copy the templates
+mkdir supabase/functions/your-function
+cp supabase/functions/_templates/function-template.ts supabase/functions/your-function/index.ts
+cp supabase/functions/_templates/logic-template.ts supabase/functions/your-function/logic.ts
+cp supabase/functions/_templates/test-template.ts supabase/functions/your-function/test.ts
+cp supabase/functions/_templates/logic.test.ts supabase/functions/your-function/logic.test.ts
 ```
 
-The template includes:
-- TypeScript type definitions
-- Structured error handling with `AppError` class
-- CORS handling
-- Examples for both anonymous and admin Supabase clients
-- Proper response formatting
+**Your function directory structure:**
+```
+supabase/functions/your-function/
+├── index.ts        # HTTP handler (thin layer)
+├── logic.ts        # Business logic (pure, testable)
+├── test.ts         # Integration tests (HTTP endpoint)
+└── logic.test.ts   # Unit tests (business logic only)
+```
+
+**Why this pattern?**
+- ✅ **Testable**: Unit test business logic without HTTP overhead
+- ✅ **Fast**: Logic tests run instantly (no network calls)
+- ✅ **Maintainable**: Clear separation of concerns
+- ✅ **Reusable**: Business logic can be imported by other functions
+
+**Example:**
+```typescript
+// logic.ts - Pure business logic
+export async function processOrder(orderId: string) {
+  // Your business logic here
+  return { status: 'processed', orderId };
+}
+
+// index.ts - HTTP handler
+import { processOrder } from './logic.ts';
+
+Deno.serve(async (req) => {
+  const { orderId } = await req.json();
+  const result = await processOrder(orderId);
+  return new Response(JSON.stringify(result));
+});
+
+// logic.test.ts - Fast unit tests
+import { processOrder } from './logic.ts';
+
+Deno.test("processOrder works", async () => {
+  const result = await processOrder("123");
+  assertEquals(result.status, "processed");
+});
+```
 
 ### Test Pattern with Shared Utilities:
 
