@@ -155,18 +155,15 @@ The template uses a simple email-only system (no passwords) to help you prototyp
 
 See [Supabase Auth docs](https://supabase.com/docs/guides/auth) for implementation.
 
-### Voice Agent Authentication
+### Voice Agent Security
 
-For production voice agents, add a **shared secret** for agent-to-backend authentication:
+**IMPORTANT**: The voice agent can call your backend edge functions without authentication in this starter template. For production deployments, you should implement proper authentication:
 
-1. Generate a secret: `openssl rand -hex 32`
-2. Add to `env.config` as `LIVEKIT_AGENT_SECRET`
-3. Set in LiveKit Cloud: `lk agent update-secrets --secrets "LIVEKIT_AGENT_SECRET=your-secret"`
-4. Set in Supabase: Add to deploy script's `supabase secrets set` command
-5. In edge functions, verify: `req.headers.get('X-Agent-Secret') === Deno.env.get('LIVEKIT_AGENT_SECRET')`
-6. In agent tools, send: `headers: {"X-Agent-Secret": os.environ.get("LIVEKIT_AGENT_SECRET")}`
+- **Option 1**: Enable Supabase Auth (recommended) - Voice agent receives user JWT and passes it to backend
+- **Option 2**: Implement a shared secret between agent and backend for function calls
+- **Option 3**: Use Supabase RLS policies to restrict what the voice agent can access
 
-This prevents unauthorized agents from accessing your backend while allowing your voice agent to call functions.
+See [Supabase Auth docs](https://supabase.com/docs/guides/auth) and [LiveKit Agent docs](https://docs.livekit.io/agents/) for implementation details.
 
 ## Start Building with Claude Code
 
@@ -250,12 +247,10 @@ The voice agent is in `livekit-agent/agent.py` and includes:
 - Text-to-speech using Cartesia
 - Custom tool to demonstrate calling backend edge functions
 
-**Manual deployment (if needed):**
+**Update agent after changes:**
 ```bash
 cd livekit-agent
 lk agent deploy
-lk agent set-env BACKEND_URL "https://your-project.supabase.co/functions/v1"
-lk agent set-env LIVEKIT_AGENT_SECRET "your-secret-here"
 ```
 
 **Test locally:**
