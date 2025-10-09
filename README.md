@@ -214,41 +214,47 @@ This template includes an optional voice interface powered by LiveKit agents. Us
      LIVEKIT_API_SECRET="your-secret-here"
      ```
 
-3. **Deploy Backend & Frontend**
+3. **Deploy Backend**
    ```bash
-   ./deploy_backend.sh   # Deploys edge functions AND voice agent
+   ./deploy_backend.sh   # Deploys edge functions (+ agent if already created)
+   ```
+
+   **First time:** You'll see instructions to create your voice agent manually (one-time step).
+
+   **After agent is created:** Every `./deploy_backend.sh` automatically redeploys your agent!
+
+4. **Create Voice Agent** (one-time manual step)
+
+   The first time you run `./deploy_backend.sh`, you'll see:
+
+   ```
+   📝 Voice agent setup (one-time manual step):
+
+   ⚠️  LiveKit Cloud has a limit of 2 agents per project.
+       You may need to delete old agents first.
+
+   Run these commands to create your agent:
+      cd livekit-agent
+      lk cloud auth  # Authenticate with LiveKit Cloud
+      lk agent list  # View existing agents (optional)
+      lk agent create --subdomain your-subdomain --secrets-file .env.secrets
+   ```
+
+   **Why manual?**
+   - LiveKit limits you to 2 agents per project
+   - You may need to delete old agents first with `lk agent list` and `lk agent delete`
+   - Gives you control over agent creation
+
+   **After creation:**
+   - Run `./deploy_backend.sh` again
+   - All future deployments are automated!
+
+5. **Deploy Frontend**
+   ```bash
    ./deploy_frontend.sh  # Deploys frontend
    ```
 
-   **What happens during backend deployment:**
-   - First time: Attempts to create the voice agent automatically
-   - Subsequent runs: Automatically deploys agent updates
-   - If automation fails: Shows manual instructions (likely needs `lk cloud auth`)
-
-4. **Voice Agent Deployment Details**
-
-   The deployment is fully automated! The script will:
-
-   - **First time**: Try to create your agent using `lk agent create`
-     - If successful: Agent created! You'll see `✅ Voice agent created successfully!`
-     - If it fails: You'll get manual instructions (authenticate first with `lk cloud auth`)
-
-   - **Updates**: Automatically deploy changes with `lk agent deploy`
-     - Every `./deploy_backend.sh` redeploys your agent
-     - Changes to `agent.py` are pushed immediately
-
-   **Manual fallback** (if automated deployment fails):
-   ```bash
-   cd livekit-agent
-   lk cloud auth  # Authenticate if needed
-   lk agent create --subdomain your-subdomain --secrets-file .env.secrets
-   ```
-
-   **Note**:
-   - `livekit.toml` and `.env.secrets` are auto-managed by the deploy script
-   - When switching LiveKit projects, just update `env.config` and run `./deploy_backend.sh`
-
-5. **Test Voice**
+6. **Test Voice**
    - Visit your app and click the voice button
    - Grant microphone permissions
    - Start talking!
@@ -263,10 +269,12 @@ The voice agent is in `livekit-agent/agent.py` and includes:
 
 **Deploy agent updates:**
 
-Just run the backend deploy script - it automatically deploys agent changes:
+After initial creation, updates are fully automated:
 ```bash
-./deploy_backend.sh   # Redeploys edge functions AND voice agent
+./deploy_backend.sh   # Automatically redeploys edge functions AND voice agent
 ```
+
+Every time you run the deploy script, your agent code changes are pushed to LiveKit Cloud.
 
 **Test locally:**
 ```bash

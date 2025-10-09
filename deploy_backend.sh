@@ -146,7 +146,7 @@ EOF
 
     # Check if agent already exists
     if [ -f "livekit.toml" ] && grep -q "^id = " livekit.toml; then
-        # Agent exists - deploy update
+        # Agent exists - deploy update automatically
         AGENT_ID=$(grep "^id = " livekit.toml | cut -d'"' -f2)
         echo ""
         echo "📦 Deploying voice agent update (ID: $AGENT_ID)..."
@@ -157,31 +157,24 @@ EOF
             echo "❌ Automated deployment failed. Deploy manually:"
             echo "   cd livekit-agent && lk agent deploy --secrets-file .env.secrets"
         fi
-    else
-        # No agent - try to create
         echo ""
-        echo "📦 Creating new voice agent..."
-
-        if lk agent create --silent --subdomain "$SUBDOMAIN" --secrets-file .env.secrets 2>&1 | tee /tmp/lk-create.log | grep -q "created"; then
-            # Check if agent ID was written
-            if [ -f "livekit.toml" ] && grep -q "^id = " livekit.toml; then
-                AGENT_ID=$(grep "^id = " livekit.toml | cut -d'"' -f2)
-                echo "✅ Voice agent created successfully! (ID: $AGENT_ID)"
-            else
-                echo "⚠️ Agent creation unclear - please verify manually"
-            fi
-        else
-            echo "⚠️ Automated creation failed (likely needs authentication)"
-            echo ""
-            echo "Please run these commands manually:"
-            echo "   cd livekit-agent"
-            echo "   lk cloud auth  # Authenticate if needed"
-            echo "   lk agent create --subdomain $SUBDOMAIN --secrets-file .env.secrets"
-            echo ""
-            echo "The .env.secrets file has been created for you."
-        fi
+    else
+        # No agent - show manual creation instructions
+        echo ""
+        echo "📝 Voice agent setup (one-time manual step):"
+        echo ""
+        echo "⚠️  LiveKit Cloud has a limit of 2 agents per project."
+        echo "    You may need to delete old agents first."
+        echo ""
+        echo "Run these commands to create your agent:"
+        echo "   cd livekit-agent"
+        echo "   lk cloud auth  # Authenticate with LiveKit Cloud"
+        echo "   lk agent list  # View existing agents (optional)"
+        echo "   lk agent create --subdomain $SUBDOMAIN --secrets-file .env.secrets"
+        echo ""
+        echo "After creation, run ./deploy_backend.sh again to deploy updates automatically."
+        echo ""
     fi
-    echo ""
 
     cd ..
 fi
