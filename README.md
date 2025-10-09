@@ -155,14 +155,35 @@ This template includes an optional voice interface powered by LiveKit agents. Us
 
 ### Setup Voice Interface
 
-1. **Create LiveKit Cloud Account**
-   - Sign up at [cloud.livekit.io](https://cloud.livekit.io)
-   - Create a new project
-   - Get your credentials from Project Settings
+1. **Create LiveKit Cloud Account and Get Credentials**
+
+   a. **Sign up**:
+   - Go to [cloud.livekit.io](https://cloud.livekit.io)
+   - Create a free account
+   - Click "Create Project" and choose a project name
+
+   b. **Get your credentials**:
+   - Once in your project, go to **Settings** → **Keys**
+   - You'll find three values:
+     - **Project URL** (starts with `wss://your-project.livekit.cloud`) → Use for `LIVEKIT_URL`
+     - **API Key** (e.g., `APIxxxxx`) → Use for `LIVEKIT_API_KEY`
+     - **API Secret** (long string) → Use for `LIVEKIT_API_SECRET`
+   - Copy these values - you'll need them for `env.config`
+
+   c. **Generate agent secret**:
+   ```bash
+   openssl rand -hex 32
+   ```
+   - Copy the output → Use for `LIVEKIT_AGENT_SECRET`
 
 2. **Configure Environment**
-   - Add LiveKit credentials to `env.config` (see setup section above)
-   - Generate a random secret for `LIVEKIT_AGENT_SECRET`
+   - Add all four LiveKit values to `env.config`:
+     ```
+     LIVEKIT_URL="wss://your-project.livekit.cloud"
+     LIVEKIT_API_KEY="APIxxxxx"
+     LIVEKIT_API_SECRET="your-secret-here"
+     LIVEKIT_AGENT_SECRET="generated-hex-here"
+     ```
 
 3. **Deploy Backend & Frontend**
    ```bash
