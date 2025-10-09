@@ -216,26 +216,37 @@ This template includes an optional voice interface powered by LiveKit agents. Us
 
 3. **Deploy Backend & Frontend**
    ```bash
-   ./deploy_backend.sh   # Deploys edge functions, shows voice agent instructions
+   ./deploy_backend.sh   # Deploys edge functions AND voice agent
    ./deploy_frontend.sh  # Deploys frontend
    ```
 
-4. **Deploy Voice Agent** (manual step)
+   **What happens during backend deployment:**
+   - First time: Attempts to create the voice agent automatically
+   - Subsequent runs: Automatically deploys agent updates
+   - If automation fails: Shows manual instructions (likely needs `lk cloud auth`)
 
-   The backend script will show you the exact command to run. It will look like:
+4. **Voice Agent Deployment Details**
 
+   The deployment is fully automated! The script will:
+
+   - **First time**: Try to create your agent using `lk agent create`
+     - If successful: Agent created! You'll see `✅ Voice agent created successfully!`
+     - If it fails: You'll get manual instructions (authenticate first with `lk cloud auth`)
+
+   - **Updates**: Automatically deploy changes with `lk agent deploy`
+     - Every `./deploy_backend.sh` redeploys your agent
+     - Changes to `agent.py` are pushed immediately
+
+   **Manual fallback** (if automated deployment fails):
    ```bash
    cd livekit-agent
-   echo "BACKEND_URL=https://your-project.supabase.co/functions/v1" > .env.secrets
+   lk cloud auth  # Authenticate if needed
    lk agent create --subdomain your-subdomain --secrets-file .env.secrets
    ```
 
-   This creates a new agent in your LiveKit project. The agent ID and subdomain will be saved to `livekit.toml`.
-
    **Note**:
-   - You can have multiple agents per LiveKit project - this won't replace existing agents!
-   - `livekit.toml` is auto-managed by `deploy_backend.sh` and syncs with your `LIVEKIT_URL` in `env.config`
-   - When switching between LiveKit projects, just update `env.config` and run `./deploy_backend.sh`
+   - `livekit.toml` and `.env.secrets` are auto-managed by the deploy script
+   - When switching LiveKit projects, just update `env.config` and run `./deploy_backend.sh`
 
 5. **Test Voice**
    - Visit your app and click the voice button
@@ -250,10 +261,11 @@ The voice agent is in `livekit-agent/agent.py` and includes:
 - Text-to-speech using Cartesia
 - Custom tool to demonstrate calling backend edge functions
 
-**Update agent after changes:**
+**Deploy agent updates:**
+
+Just run the backend deploy script - it automatically deploys agent changes:
 ```bash
-cd livekit-agent
-lk agent deploy
+./deploy_backend.sh   # Redeploys edge functions AND voice agent
 ```
 
 **Test locally:**

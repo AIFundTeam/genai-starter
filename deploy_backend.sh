@@ -141,28 +141,47 @@ EOF
         fi
     fi
 
-    # Voice agent must be deployed manually (lk CLI requires interactive terminal)
-    echo ""
-    echo "📝 Voice agent deployment (manual step required):"
-    echo ""
-    echo "The LiveKit CLI requires an interactive terminal to create agents."
-    echo "Please run these commands manually:"
-    echo ""
-    echo "cd livekit-agent"
-    echo "echo \"BACKEND_URL=https://${SUPABASE_PROJECT_REF}.supabase.co/functions/v1\" > .env.secrets"
-    echo "lk agent create --subdomain $SUBDOMAIN --secrets-file .env.secrets"
-    echo ""
-    echo "This will create a new agent alongside any existing agents in your project."
-    echo "The agent ID will be written to livekit.toml for future deployments."
-    echo ""
+    # Create .env.secrets file with backend URL
+    echo "BACKEND_URL=https://${SUPABASE_PROJECT_REF}.supabase.co/functions/v1" > .env.secrets
 
     # Check if agent already exists
     if [ -f "livekit.toml" ] && grep -q "^id = " livekit.toml; then
+        # Agent exists - deploy update
         AGENT_ID=$(grep "^id = " livekit.toml | cut -d'"' -f2)
-        echo "✓ Existing agent found (ID: $AGENT_ID)"
-        echo "To update: cd livekit-agent && lk agent deploy"
         echo ""
+        echo "📦 Deploying voice agent update (ID: $AGENT_ID)..."
+
+        if lk agent deploy --secrets-file .env.secrets > /dev/null 2>&1; then
+            echo "✅ Voice agent deployed successfully!"
+        else
+            echo "❌ Automated deployment failed. Deploy manually:"
+            echo "   cd livekit-agent && lk agent deploy --secrets-file .env.secrets"
+        fi
+    else
+        # No agent - try to create
+        echo ""
+        echo "📦 Creating new voice agent..."
+
+        if lk agent create --silent --subdomain "$SUBDOMAIN" --secrets-file .env.secrets 2>&1 | tee /tmp/lk-create.log | grep -q "created"; then
+            # Check if agent ID was written
+            if [ -f "livekit.toml" ] && grep -q "^id = " livekit.toml; then
+                AGENT_ID=$(grep "^id = " livekit.toml | cut -d'"' -f2)
+                echo "✅ Voice agent created successfully! (ID: $AGENT_ID)"
+            else
+                echo "⚠️ Agent creation unclear - please verify manually"
+            fi
+        else
+            echo "⚠️ Automated creation failed (likely needs authentication)"
+            echo ""
+            echo "Please run these commands manually:"
+            echo "   cd livekit-agent"
+            echo "   lk cloud auth  # Authenticate if needed"
+            echo "   lk agent create --subdomain $SUBDOMAIN --secrets-file .env.secrets"
+            echo ""
+            echo "The .env.secrets file has been created for you."
+        fi
     fi
+    echo ""
 
     cd ..
 fi
