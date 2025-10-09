@@ -97,17 +97,49 @@ if [ "$LIVEKIT_CONFIGURED" = true ]; then
         pip install -r requirements.txt > /dev/null 2>&1
     fi
 
-    # Create livekit.toml from template if it doesn't exist
-    if [ ! -f "livekit.toml" ]; then
+    # Extract subdomain from LIVEKIT_URL (e.g., wss://tutor-j7bhwjbm.livekit.cloud -> tutor-j7bhwjbm)
+    SUBDOMAIN=$(echo "$LIVEKIT_URL" | sed -E 's|wss://([^.]+)\.livekit\.cloud|\1|')
+
+    # Create or update livekit.toml with correct subdomain
+    if [ -f "livekit.toml" ]; then
+        # Check if subdomain needs updating
+        CURRENT_SUBDOMAIN=$(grep "^  subdomain = " livekit.toml | cut -d'"' -f2)
+        if [ "$CURRENT_SUBDOMAIN" != "$SUBDOMAIN" ]; then
+            echo "⚙️ Updating livekit.toml subdomain: $CURRENT_SUBDOMAIN → $SUBDOMAIN"
+            # Update subdomain but preserve agent ID if it exists
+            if grep -q "^id = " livekit.toml; then
+                AGENT_ID=$(grep "^id = " livekit.toml | cut -d'"' -f2)
+                cat > livekit.toml <<EOF
+[project]
+  subdomain = "$SUBDOMAIN"
+
+[agent]
+  id = "$AGENT_ID"
+EOF
+            else
+                cat > livekit.toml <<EOF
+[project]
+  subdomain = "$SUBDOMAIN"
+
+[agent]
+# Agent ID will be assigned by LiveKit Cloud after first deployment
+EOF
+            fi
+        fi
+    else
+        # Create from template
         if [ -f "livekit.toml.template" ]; then
-            cp livekit.toml.template livekit.toml
+            cat > livekit.toml <<EOF
+[project]
+  subdomain = "$SUBDOMAIN"
+
+[agent]
+# Agent ID will be assigned by LiveKit Cloud after first deployment
+EOF
         else
             echo "Warning: livekit.toml.template not found"
         fi
     fi
-
-    # Extract subdomain from LIVEKIT_URL (e.g., wss://tutor-j7bhwjbm.livekit.cloud -> tutor-j7bhwjbm)
-    SUBDOMAIN=$(echo "$LIVEKIT_URL" | sed -E 's|wss://([^.]+)\.livekit\.cloud|\1|')
 
     # Voice agent must be deployed manually (lk CLI requires interactive terminal)
     echo ""

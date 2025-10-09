@@ -48,6 +48,10 @@ build/
 .wrangler/
 wrangler.toml
 
+# LiveKit Agent (project-specific)
+livekit-agent/livekit.toml
+livekit-agent/.env.secrets
+
 # Temporary files
 *.tmp
 *.temp
