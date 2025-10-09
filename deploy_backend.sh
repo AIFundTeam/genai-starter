@@ -113,22 +113,22 @@ if [ "$LIVEKIT_CONFIGURED" = true ]; then
     echo ""
     echo "📝 Voice agent deployment (manual step required):"
     echo ""
-    echo "   The LiveKit CLI requires an interactive terminal to create agents."
-    echo "   Please run these commands manually:"
+    echo "The LiveKit CLI requires an interactive terminal to create agents."
+    echo "Please run these commands manually:"
     echo ""
-    echo "   cd livekit-agent"
-    echo "   echo \"BACKEND_URL=https://${SUPABASE_PROJECT_REF}.supabase.co/functions/v1\" > .env.secrets"
-    echo "   lk agent create --subdomain $SUBDOMAIN --secrets-file .env.secrets"
+    echo "cd livekit-agent"
+    echo "echo \"BACKEND_URL=https://${SUPABASE_PROJECT_REF}.supabase.co/functions/v1\" > .env.secrets"
+    echo "lk agent create --subdomain $SUBDOMAIN --secrets-file .env.secrets"
     echo ""
-    echo "   This will create a new agent alongside any existing agents in your project."
-    echo "   The agent ID will be written to livekit.toml for future deployments."
+    echo "This will create a new agent alongside any existing agents in your project."
+    echo "The agent ID will be written to livekit.toml for future deployments."
     echo ""
 
     # Check if agent already exists
     if [ -f "livekit.toml" ] && grep -q "^id = " livekit.toml; then
         AGENT_ID=$(grep "^id = " livekit.toml | cut -d'"' -f2)
-        echo "   ✓ Existing agent found (ID: $AGENT_ID)"
-        echo "   To update: cd livekit-agent && lk agent deploy"
+        echo "✓ Existing agent found (ID: $AGENT_ID)"
+        echo "To update: cd livekit-agent && lk agent deploy"
         echo ""
     fi
 

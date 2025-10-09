@@ -136,6 +136,101 @@ export const styles = `
     color: var(--text-secondary);
   }
 
+  /* Status Grid */
+  .status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+
+  .status-card {
+    background: var(--surface);
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 2px solid var(--border-color);
+    box-shadow: var(--shadow);
+    transition: all 0.2s;
+  }
+
+  .status-card:hover {
+    box-shadow: var(--shadow-lg);
+  }
+
+  .status-card.status-enabled {
+    border-color: #10b981;
+    background: linear-gradient(to bottom, #f0fdf4 0%, var(--surface) 20%);
+  }
+
+  .status-card.status-disabled {
+    border-color: #cbd5e1;
+    background: linear-gradient(to bottom, #f8fafc 0%, var(--surface) 20%);
+    opacity: 0.85;
+  }
+
+  .status-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    gap: 0.5rem;
+  }
+
+  .status-header h4 {
+    margin: 0;
+    font-size: 1.125rem;
+    color: var(--text-primary);
+    flex: 1;
+  }
+
+  .status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    white-space: nowrap;
+  }
+
+  .status-badge.enabled {
+    background-color: #d1fae5;
+    color: #065f46;
+  }
+
+  .status-badge.disabled {
+    background-color: #f1f5f9;
+    color: #64748b;
+  }
+
+  .status-card > p {
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+  }
+
+  .status-details {
+    margin: 0;
+    padding-left: 1.25rem;
+    list-style: disc;
+  }
+
+  .status-details li {
+    color: var(--text-secondary);
+    margin: 0.375rem 0;
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  .status-details code {
+    background: var(--background);
+    padding: 0.125rem 0.375rem;
+    border-radius: 3px;
+    font-family: 'Monaco', 'Menlo', monospace;
+    font-size: 0.8125rem;
+  }
+
   /* Buttons */
   .btn {
     display: inline-block;
@@ -321,8 +416,15 @@ export const styles = `
       font-size: 1.125rem;
     }
 
-    .features-grid {
+    .features-grid,
+    .status-grid {
       grid-template-columns: 1fr;
+    }
+
+    .status-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
     }
   }
 `;

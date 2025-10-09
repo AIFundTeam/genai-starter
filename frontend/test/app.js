@@ -7,8 +7,7 @@ class TestApp extends HTMLElement {
     this.attachShadow({ mode: 'open' });
     this.testsPassed = {
       database: false,
-      llm: false,
-      voice: false
+      llm: false
     };
   }
 
@@ -68,14 +67,6 @@ class TestApp extends HTMLElement {
                 </button>
               </div>
             </div>
-
-            <div class="test-card">
-              <h4>4. Voice Interface</h4>
-              <button class="btn btn-secondary" id="test-voice-btn">
-                Test Voice Token
-              </button>
-              <p class="test-note">Tests LiveKit token generation (voice agent deployment separate)</p>
-            </div>
           </div>
           
           <div id="test-results" class="test-results"></div>
@@ -111,10 +102,6 @@ class TestApp extends HTMLElement {
     // Test LLM button
     const testLlmBtn = this.shadowRoot.getElementById('test-llm-btn');
     testLlmBtn.addEventListener('click', () => this.testLLM());
-
-    // Test Voice button
-    const testVoiceBtn = this.shadowRoot.getElementById('test-voice-btn');
-    testVoiceBtn.addEventListener('click', () => this.testVoice());
   }
 
   initializeUserManagement() {
@@ -236,74 +223,8 @@ class TestApp extends HTMLElement {
     }
   }
 
-  async testVoice() {
-    const resultsDiv = this.shadowRoot.getElementById('test-results');
-
-    resultsDiv.innerHTML = '<p>⏳ Testing voice token generation...</p>';
-
-    try {
-      const userEmail = window.getCurrentUser();
-
-      // Test token generation
-      const data = await window.invokeEdgeFunction('livekit-token', {
-        user_email: userEmail,
-      });
-
-      if (data.error) {
-        throw new Error(data.message || data.error);
-      }
-
-      // Check if we got a valid response
-      if (data.token && data.url && data.room_name) {
-        resultsDiv.innerHTML = `
-          <div class="alert alert-success">
-            <strong>✅ Voice Token:</strong> Successfully generated LiveKit access token
-            <br><small>Room: ${data.room_name}</small>
-            <br><small>URL: ${data.url}</small>
-            <br><br>
-            <strong>Next steps:</strong>
-            <br>• Deploy the voice agent: <code>cd livekit-agent && lk agent deploy</code>
-            <br>• Try the voice interface in the main app
-          </div>
-        `;
-        this.testsPassed.voice = true;
-        this.checkAllTests();
-      } else {
-        throw new Error('Invalid response from token service');
-      }
-    } catch (error) {
-      const errorCode = error.message;
-
-      if (errorCode.includes('not configured') || errorCode.includes('501')) {
-        resultsDiv.innerHTML = `
-          <div class="alert alert-info">
-            <strong>ℹ️ Voice Not Configured:</strong> LiveKit credentials not set (optional feature)
-            <br><br>
-            <strong>To enable voice:</strong>
-            <ol style="text-align: left; padding-left: 2rem; margin: 0.5rem 0;">
-              <li>Sign up at <a href="https://cloud.livekit.io/" target="_blank">LiveKit Cloud</a></li>
-              <li>Add credentials to env.config</li>
-              <li>Run ./deploy_backend.sh</li>
-              <li>Deploy agent: <code>cd livekit-agent && lk agent deploy</code></li>
-            </ol>
-            <br>
-            <small>Voice is optional - your app works without it!</small>
-          </div>
-        `;
-        // Mark as passed since voice is optional
-        this.testsPassed.voice = true;
-        this.checkAllTests();
-      } else {
-        resultsDiv.innerHTML = `
-          <div class="alert alert-error">
-            <strong>❌ Voice Error:</strong> ${error.message}
-            <br><small>Check LiveKit credentials in env.config</small>
-          </div>
-        `;
-      }
-    }
-  }
 }
+
 
 // Register the custom element
 customElements.define('test-app', TestApp);
