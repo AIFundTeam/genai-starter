@@ -14,6 +14,7 @@ A Claude Code-optimized template for rapidly building full-stack web application
 ## Tech Stack
 
 - 🤖 **LLM Integration** - OpenAI API integration built-in
+- 🎤 **Voice Interface** - LiveKit voice agents (optional)
 - 👤 **Simple User System** - Email-based login (no passwords)
 - 🚀 **Edge Functions** - Serverless backend with Deno
 - 🗄️ **PostgreSQL Database** - With Row Level Security via Supabase
@@ -32,6 +33,7 @@ A Claude Code-optimized template for rapidly building full-stack web application
 - [OpenAI Account](https://platform.openai.com) with API key (required)
 - [Supabase Account](https://supabase.com) (free tier works)
 - [Cloudflare Account](https://cloudflare.com) (free tier works)
+- [LiveKit Cloud Account](https://cloud.livekit.io) (optional - for voice features)
 
 **📝 For tool installation (Supabase CLI, Node.js, Deno, Git):** See [SETUP_MACOS.md](./SETUP_MACOS.md)
 
@@ -91,6 +93,14 @@ Edit `env.config` and fill in your credentials:
 **OpenAI Values**:
 - `OPENAI_API_KEY` - Get from [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
 
+**LiveKit Values (Optional - for voice features)**:
+- `LIVEKIT_URL` - Your LiveKit server URL (e.g., wss://your-project.livekit.cloud)
+- `LIVEKIT_API_KEY` - API key from LiveKit project settings
+- `LIVEKIT_API_SECRET` - API secret from LiveKit project settings
+- `LIVEKIT_AGENT_SECRET` - Generate a random secret: `openssl rand -hex 32`
+
+**Note**: Voice features are optional. Leave these blank to skip voice integration.
+
 ### 4. Setup Database
 
 ```bash
@@ -103,8 +113,8 @@ Edit `env.config` and fill in your credentials:
 ### 5. Deploy
 
 ```bash
-./deploy_backend.sh      # Deploy Supabase Edge Functions (automatically handles all setup)
-./deploy_frontend.sh     # Deploy to Cloudflare Pages (automatically handles all setup)
+./deploy_backend.sh      # Deploy Supabase Edge Functions + Voice Agent (if configured)
+./deploy_frontend.sh     # Deploy to Cloudflare Pages
 ```
 
 The deploy scripts automatically handle:
@@ -112,6 +122,7 @@ The deploy scripts automatically handle:
 - Linking your Supabase project
 - Generating `frontend/env.js` for the frontend
 - Creating `.mcp.json` for Claude Code MCP servers
+- Deploying voice agent to LiveKit Cloud (if credentials configured)
 - Setting up all necessary configurations
 
 ### 6. Test Your Setup
@@ -132,6 +143,78 @@ Tell Claude Code what you want to build:
 
 Claude Code handles the database, backend, frontend, and tests. After schema changes, run `./setup_database.sh` to apply them.
 
+## Voice Interface (Optional)
+
+This template includes an optional voice interface powered by LiveKit agents. Users can talk to an AI assistant that can answer questions and call your backend functions.
+
+### Features
+- Browser-based voice interaction
+- Real-time speech-to-text and text-to-speech
+- Custom tools to call edge functions
+- Graceful fallback if not configured
+
+### Setup Voice Interface
+
+1. **Create LiveKit Cloud Account**
+   - Sign up at [cloud.livekit.io](https://cloud.livekit.io)
+   - Create a new project
+   - Get your credentials from Project Settings
+
+2. **Configure Environment**
+   - Add LiveKit credentials to `env.config` (see setup section above)
+   - Generate a random secret for `LIVEKIT_AGENT_SECRET`
+
+3. **Deploy Backend & Frontend**
+   ```bash
+   ./deploy_backend.sh   # Deploys edge functions, shows voice agent instructions
+   ./deploy_frontend.sh  # Deploys frontend
+   ```
+
+4. **Deploy Voice Agent** (manual step)
+
+   The backend script will show you the exact command to run. It will look like:
+
+   ```bash
+   cd livekit-agent
+   lk agent create --subdomain your-subdomain \
+     --secrets "BACKEND_URL=...,LIVEKIT_AGENT_SECRET=..."
+   ```
+
+   This creates a new agent in your LiveKit project. The agent ID will be saved to `livekit.toml`.
+
+   **Note**: You can have multiple agents per LiveKit project - this won't replace existing agents!
+
+5. **Test Voice**
+   - Visit your app and click the voice button
+   - Grant microphone permissions
+   - Start talking!
+
+### Voice Agent Development
+
+The voice agent is in `livekit-agent/agent.py` and includes:
+- Speech-to-text using LiveKit Inference (Deepgram)
+- LLM responses using OpenAI GPT-5 via LiveKit Inference
+- Text-to-speech using Cartesia
+- Custom tool to demonstrate calling backend edge functions
+
+**Manual deployment (if needed):**
+```bash
+cd livekit-agent
+lk agent deploy
+lk agent set-env BACKEND_URL "https://your-project.supabase.co/functions/v1"
+lk agent set-env LIVEKIT_AGENT_SECRET "your-secret-here"
+```
+
+**Test locally:**
+```bash
+cd livekit-agent
+python agent.py dev
+```
+
+See `livekit-agent/README.md` for detailed documentation.
+
+**Note**: `./deploy_backend.sh` handles all of this automatically!
+
 ## Common Issues
 
 **Missing env.js?** Run `./deploy_frontend.sh`
@@ -141,6 +224,8 @@ Claude Code handles the database, backend, frontend, and tests. After schema cha
 **Database errors?** Run `./setup_database.sh`
 
 **OpenAI errors?** Check your API key has credits at [platform.openai.com](https://platform.openai.com)
+
+**Voice not working?** Check LiveKit credentials and ensure agent is deployed
 
 **Still stuck?** Copy the error and ask Claude Code: "Help me debug this error: [paste error]"
 

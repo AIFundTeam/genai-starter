@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+
+# Environment
+.env
+.env.*
+
+# LiveKit agent config (contains generated agent ID)
+livekit.toml
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

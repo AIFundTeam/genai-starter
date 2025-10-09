@@ -1,22 +1,7 @@
-// Test LLM integration - HTTP handler
+// LiveKit token generation - HTTP handler
 // Business logic is in logic.ts for testability
 import { corsHeaders, handleCors } from '../_shared/cors.ts';
-import { callLLM, LLMError } from './logic.ts';
-
-/**
- * Verify agent authentication using shared secret
- */
-function verifyAgentAuth(req: Request): boolean {
-  const agentSecret = req.headers.get('X-Agent-Secret');
-  const expectedSecret = Deno.env.get('LIVEKIT_AGENT_SECRET');
-
-  // If no secret configured, agent auth is disabled
-  if (!expectedSecret) {
-    return false;
-  }
-
-  return agentSecret === expectedSecret;
-}
+import { generateLiveKitToken, LiveKitError } from './logic.ts';
 
 Deno.serve(async (req) => {
   // Handle CORS preflight
@@ -24,17 +9,14 @@ Deno.serve(async (req) => {
   if (corsResponse) return corsResponse;
 
   try {
-    // Check authentication (either agent secret or normal user flow)
-    const isAgentAuthenticated = verifyAgentAuth(req);
-
     // Parse request body
-    let prompt = 'Hello';
     let user_email = 'anonymous';
+    let room_name = undefined;
 
     try {
       const body = await req.json();
-      prompt = body.prompt || 'Hello';
       user_email = body.user_email || 'anonymous';
+      room_name = body.room_name;
     } catch (jsonError) {
       console.error('JSON parsing error:', jsonError);
       return new Response(
@@ -50,7 +32,7 @@ Deno.serve(async (req) => {
     }
 
     // Call business logic
-    const result = await callLLM({ prompt, user_email });
+    const result = await generateLiveKitToken({ user_email, room_name });
 
     // Return response
     return new Response(
@@ -62,10 +44,10 @@ Deno.serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Error in test-llm function:', error);
+    console.error('Error in livekit-token function:', error);
 
     // Handle business logic errors
-    if (error instanceof LLMError) {
+    if (error instanceof LiveKitError) {
       return new Response(
         JSON.stringify({
           error: error.message,

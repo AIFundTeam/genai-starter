@@ -11,6 +11,7 @@ This is a full-stack web application template built with:
 - **Hosting**: Cloudflare Pages (frontend), Supabase (backend)
 - **Users**: Email-based user identification (no passwords or authentication)
 - **AI/LLM**: OpenAI API integration (required)
+- **Voice**: LiveKit voice agents (optional)
 
 ## Key Commands
 
@@ -205,8 +206,13 @@ template/
 │   ├── functions/         # Edge functions
 │   │   ├── _shared/       # Shared utilities
 │   │   │   └── cors.ts    # CORS configuration
-│   │   └── test-llm/      # LLM integration endpoint
+│   │   ├── test-llm/      # LLM integration endpoint
+│   │   └── livekit-token/ # Voice token generation
 │   └── config.toml        # Supabase configuration
+├── livekit-agent/         # Voice agent (optional)
+│   ├── agent.py           # Python voice agent
+│   ├── requirements.txt   # Python dependencies
+│   └── livekit.toml      # LiveKit config
 ├── sql/
 │   └── schema.sql         # Database schema
 ├── deploy_backend.sh      # Backend deployment script
@@ -471,6 +477,43 @@ The template includes a working OpenAI integration example in `test-llm` functio
 2. Modify the system prompt for your use case
 3. Adjust max_tokens and temperature as needed
 4. Add any additional context or parameters
+
+### Voice Interface Pattern (Optional)
+
+The template includes an optional voice interface powered by LiveKit agents:
+- **Browser Client**: LiveKit client SDK for voice interaction
+- **Token Generation**: `livekit-token` edge function generates JWT tokens
+- **Voice Agent**: Python agent deployed on LiveKit Cloud
+- **Backend Integration**: Agent can call edge functions with shared secret authentication
+
+**Voice Flow:**
+1. User clicks voice button → frontend requests token from `livekit-token` function
+2. Frontend connects to LiveKit room with token
+3. LiveKit agent automatically joins the room
+4. User speaks → Agent processes with STT/LLM/TTS
+5. Agent can call backend functions (e.g., `test-llm`) using shared secret
+
+**Authentication:**
+- **Browser ↔ Backend**: Standard Supabase function calls
+- **Browser ↔ LiveKit**: JWT token from `livekit-token` function
+- **Agent ↔ Backend**: Shared secret in `X-Agent-Secret` header
+
+**Agent Development:**
+- Agent code: `livekit-agent/agent.py`
+- Uses LiveKit Inference for STT/LLM/TTS billing
+- Deploy with: `cd livekit-agent && lk agent deploy`
+- Test locally: `cd livekit-agent && python agent.py dev`
+
+**Graceful Degradation:**
+- If LiveKit credentials not configured, voice button shows setup instructions
+- App works normally without voice features
+- Test page validates token generation (marks as passed if not configured)
+
+**To add voice features to your app:**
+1. Voice interface is already set up in `frontend/app/`
+2. Agent demonstrates calling `test-llm` function
+3. Add custom tools in `agent.py` to call your edge functions
+4. Use shared secret for authentication (automatically handled by deploy script)
 
 ### Common User Requests and How to Handle Them
 

@@ -37,13 +37,28 @@ if [ ! -f "supabase/.temp/project-ref" ] || [ "$(cat supabase/.temp/project-ref 
     supabase link --project-ref "$SUPABASE_PROJECT_REF" --password "$SUPABASE_DB_PASSWORD" > /dev/null 2>&1
 fi
 
-# Set OpenAI API key as a secret
+# Set secrets for edge functions
 supabase secrets set OPENAI_API_KEY="$OPENAI_API_KEY" --project-ref "$SUPABASE_PROJECT_REF" > /dev/null 2>&1
+
+# Set LiveKit secrets (optional - only if configured)
+LIVEKIT_CONFIGURED=false
+if [ -n "$LIVEKIT_URL" ] && [ -n "$LIVEKIT_API_KEY" ] && [ -n "$LIVEKIT_API_SECRET" ] && [ -n "$LIVEKIT_AGENT_SECRET" ]; then
+    supabase secrets set \
+        LIVEKIT_URL="$LIVEKIT_URL" \
+        LIVEKIT_API_KEY="$LIVEKIT_API_KEY" \
+        LIVEKIT_API_SECRET="$LIVEKIT_API_SECRET" \
+        LIVEKIT_AGENT_SECRET="$LIVEKIT_AGENT_SECRET" \
+        --project-ref "$SUPABASE_PROJECT_REF" > /dev/null 2>&1
+    echo "LiveKit credentials configured"
+    LIVEKIT_CONFIGURED=true
+else
+    echo "⚠️ LiveKit credentials not found - voice features will be disabled"
+fi
 
 # Deploy all edge functions
 
-# Get list of functions (excluding _shared directory)
-FUNCTIONS=$(ls -d supabase/functions/*/ 2>/dev/null | grep -v '_shared' | xargs -n 1 basename)
+# Get list of functions (excluding _shared and _templates directories)
+FUNCTIONS=$(ls -d supabase/functions/*/ 2>/dev/null | grep -v '_shared' | grep -v '_templates' | xargs -n 1 basename)
 
 if [ -z "$FUNCTIONS" ]; then
     echo "⚠️ No functions found to deploy"
@@ -63,4 +78,61 @@ else
 fi
 
 echo "Backend ready!"
+
+# Deploy voice agent if LiveKit is configured
+if [ "$LIVEKIT_CONFIGURED" = true ]; then
+    echo ""
+    echo "Deploying voice agent..."
+
+    # Check if lk CLI is installed
+    if ! command -v lk &> /dev/null; then
+        echo "⚠️ LiveKit CLI not installed. Install with: brew install livekit"
+        echo "   Then run: cd livekit-agent && lk agent deploy"
+        exit 0
+    fi
+
+    # Check if Python dependencies are installed
+    cd livekit-agent
+    if ! python3 -c "import livekit.agents" 2>/dev/null; then
+        echo "📦 Installing Python dependencies..."
+        pip install -r requirements.txt > /dev/null 2>&1
+    fi
+
+    # Create livekit.toml from template if it doesn't exist
+    if [ ! -f "livekit.toml" ]; then
+        if [ -f "livekit.toml.template" ]; then
+            cp livekit.toml.template livekit.toml
+        else
+            echo "Warning: livekit.toml.template not found"
+        fi
+    fi
+
+    # Extract subdomain from LIVEKIT_URL (e.g., wss://tutor-j7bhwjbm.livekit.cloud -> tutor-j7bhwjbm)
+    SUBDOMAIN=$(echo "$LIVEKIT_URL" | sed -E 's|wss://([^.]+)\.livekit\.cloud|\1|')
+
+    # Voice agent must be deployed manually (lk CLI requires interactive terminal)
+    echo ""
+    echo "📝 Voice agent deployment (manual step required):"
+    echo ""
+    echo "   The LiveKit CLI requires an interactive terminal to create agents."
+    echo "   Please run these commands manually:"
+    echo ""
+    echo "   cd livekit-agent"
+    echo "   lk agent create --subdomain $SUBDOMAIN \\"
+    echo "     --secrets \"BACKEND_URL=https://${SUPABASE_PROJECT_REF}.supabase.co/functions/v1,LIVEKIT_AGENT_SECRET=$LIVEKIT_AGENT_SECRET\""
+    echo ""
+    echo "   This will create a new agent alongside any existing agents in your project."
+    echo "   The agent ID will be written to livekit.toml for future deployments."
+    echo ""
+
+    # Check if agent already exists
+    if [ -f "livekit.toml" ] && grep -q "^id = " livekit.toml; then
+        AGENT_ID=$(grep "^id = " livekit.toml | cut -d'"' -f2)
+        echo "   ✓ Existing agent found (ID: $AGENT_ID)"
+        echo "   To update: cd livekit-agent && lk agent deploy"
+        echo ""
+    fi
+
+    cd ..
+fi
 

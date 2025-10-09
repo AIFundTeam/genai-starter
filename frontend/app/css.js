@@ -210,16 +210,117 @@ export const styles = `
     margin: 0.5rem 0;
   }
 
+  /* Voice Interface */
+  .voice-section {
+    background: var(--surface);
+    padding: 2rem;
+    border-radius: 8px;
+    margin-top: 2rem;
+    border: 1px solid var(--border-color);
+  }
+
+  .voice-section h3 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+  }
+
+  .voice-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+
+  .voice-button {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: none;
+    background-color: var(--primary-color);
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .voice-button:hover:not(:disabled) {
+    background-color: var(--primary-hover);
+    transform: scale(1.05);
+  }
+
+  .voice-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .voice-button.connected {
+    background-color: var(--danger-color);
+    animation: pulse 2s infinite;
+  }
+
+  .voice-button.connected:hover {
+    background-color: var(--danger-hover);
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7);
+    }
+    50% {
+      box-shadow: 0 0 0 10px rgba(220, 38, 38, 0);
+    }
+  }
+
+  .voice-status {
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    min-height: 20px;
+  }
+
+  .voice-status.connected {
+    color: var(--success-color);
+    font-weight: 500;
+  }
+
+  .voice-status.error {
+    color: var(--danger-color);
+  }
+
+  .voice-info {
+    background: var(--background);
+    padding: 1rem;
+    border-radius: 6px;
+    margin-top: 1rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+  }
+
+  .voice-info p {
+    margin: 0.5rem 0;
+  }
+
+  .voice-info a {
+    color: var(--primary-color);
+    text-decoration: none;
+  }
+
+  .voice-info a:hover {
+    text-decoration: underline;
+  }
+
   /* Responsive */
   @media (max-width: 768px) {
     .welcome-section h2 {
       font-size: 2rem;
     }
-    
+
     .welcome-section p {
       font-size: 1.125rem;
     }
-    
+
     .features-grid {
       grid-template-columns: 1fr;
     }

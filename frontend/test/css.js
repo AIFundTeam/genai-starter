@@ -265,6 +265,19 @@ export const styles = `
     border: 1px solid #fca5a5;
   }
 
+  .alert-info {
+    background-color: #dbeafe;
+    color: #1e3a8a;
+    border: 1px solid #93c5fd;
+  }
+
+  /* Test Card Elements */
+  .test-note {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+  }
+
   /* Responsive */
   @media (max-width: 768px) {
     .welcome-section h2 {

@@ -7,6 +7,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Drop existing objects to ensure clean state
 DROP TABLE IF EXISTS items CASCADE;
+DROP TABLE IF EXISTS voice_counter CASCADE;
 DROP FUNCTION IF EXISTS update_updated_at_column() CASCADE;
 
 -- Items table (no authentication required)
@@ -55,6 +56,26 @@ CREATE TRIGGER update_items_updated_at BEFORE UPDATE ON items
 
 -- Enable realtime for items table
 ALTER PUBLICATION supabase_realtime ADD TABLE items;
+
+-- Voice counter table for voice agent demo
+CREATE TABLE voice_counter (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    count INTEGER DEFAULT 0,
+    last_called_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
+);
+
+-- Insert initial counter row
+INSERT INTO voice_counter (count) VALUES (0);
+
+-- Enable Row Level Security
+ALTER TABLE voice_counter ENABLE ROW LEVEL SECURITY;
+
+-- RLS Policies (allow all operations)
+CREATE POLICY "Anyone can view counter" ON voice_counter
+    FOR SELECT USING (true);
+
+CREATE POLICY "Anyone can update counter" ON voice_counter
+    FOR UPDATE USING (true);
 
 -- Grant necessary permissions
 GRANT USAGE ON SCHEMA public TO anon, authenticated;

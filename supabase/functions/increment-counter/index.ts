@@ -1,7 +1,7 @@
-// Test LLM integration - HTTP handler
+// Increment counter - HTTP handler
 // Business logic is in logic.ts for testability
 import { corsHeaders, handleCors } from '../_shared/cors.ts';
-import { callLLM, LLMError } from './logic.ts';
+import { incrementCounter, CounterError } from './logic.ts';
 
 /**
  * Verify agent authentication using shared secret
@@ -24,33 +24,24 @@ Deno.serve(async (req) => {
   if (corsResponse) return corsResponse;
 
   try {
-    // Check authentication (either agent secret or normal user flow)
+    // Check authentication (agent secret required for this function)
     const isAgentAuthenticated = verifyAgentAuth(req);
 
-    // Parse request body
-    let prompt = 'Hello';
-    let user_email = 'anonymous';
-
-    try {
-      const body = await req.json();
-      prompt = body.prompt || 'Hello';
-      user_email = body.user_email || 'anonymous';
-    } catch (jsonError) {
-      console.error('JSON parsing error:', jsonError);
+    if (!isAgentAuthenticated) {
       return new Response(
         JSON.stringify({
-          error: "Invalid JSON in request body",
-          message: jsonError.message,
+          error: 'Unauthorized',
+          message: 'Agent authentication required',
         }),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 400,
+          status: 401,
         }
       );
     }
 
     // Call business logic
-    const result = await callLLM({ prompt, user_email });
+    const result = await incrementCounter();
 
     // Return response
     return new Response(
@@ -62,10 +53,10 @@ Deno.serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Error in test-llm function:', error);
+    console.error('Error in increment-counter function:', error);
 
     // Handle business logic errors
-    if (error instanceof LLMError) {
+    if (error instanceof CounterError) {
       return new Response(
         JSON.stringify({
           error: error.message,

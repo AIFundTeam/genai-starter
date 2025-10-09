@@ -1,0 +1,9 @@
+# LiveKit agent dependencies
+livekit-agents[turn-detector]>=1.2.0
+
+# LiveKit plugins
+livekit-plugins-silero
+livekit-plugins-noise-cancellation
+
+# HTTP client for backend calls
+httpx>=0.27.0
