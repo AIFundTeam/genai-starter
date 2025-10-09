@@ -212,7 +212,7 @@ template/
 ├── livekit-agent/         # Voice agent (optional)
 │   ├── agent.py           # Python voice agent
 │   ├── requirements.txt   # Python dependencies
-│   └── livekit.toml      # LiveKit config
+│   └── livekit.toml      # LiveKit config (auto-generated/synced)
 ├── sql/
 │   └── schema.sql         # Database schema
 ├── deploy_backend.sh      # Backend deployment script

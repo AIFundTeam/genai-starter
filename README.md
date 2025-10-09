@@ -226,13 +226,16 @@ This template includes an optional voice interface powered by LiveKit agents. Us
 
    ```bash
    cd livekit-agent
-   lk agent create --subdomain your-subdomain \
-     --secrets "BACKEND_URL=https://your-project.supabase.co/functions/v1"
+   echo "BACKEND_URL=https://your-project.supabase.co/functions/v1" > .env.secrets
+   lk agent create --subdomain your-subdomain --secrets-file .env.secrets
    ```
 
-   This creates a new agent in your LiveKit project. The agent ID will be saved to `livekit.toml`.
+   This creates a new agent in your LiveKit project. The agent ID and subdomain will be saved to `livekit.toml`.
 
-   **Note**: You can have multiple agents per LiveKit project - this won't replace existing agents!
+   **Note**:
+   - You can have multiple agents per LiveKit project - this won't replace existing agents!
+   - `livekit.toml` is auto-managed by `deploy_backend.sh` and syncs with your `LIVEKIT_URL` in `env.config`
+   - When switching between LiveKit projects, just update `env.config` and run `./deploy_backend.sh`
 
 5. **Test Voice**
    - Visit your app and click the voice button
