@@ -107,8 +107,8 @@ if [ "$LIVEKIT_CONFIGURED" = true ]; then
         if [ "$CURRENT_SUBDOMAIN" != "$SUBDOMAIN" ]; then
             echo "⚙️ Updating livekit.toml subdomain: $CURRENT_SUBDOMAIN → $SUBDOMAIN"
             # Update subdomain but preserve agent ID if it exists
-            if grep -q "^id = " livekit.toml; then
-                AGENT_ID=$(grep "^id = " livekit.toml | cut -d'"' -f2)
+            if grep -q "^  id = " livekit.toml; then
+                AGENT_ID=$(grep "^  id = " livekit.toml | cut -d'"' -f2)
                 cat > livekit.toml <<EOF
 [project]
   subdomain = "$SUBDOMAIN"
@@ -145,9 +145,9 @@ EOF
     echo "BACKEND_URL=https://${SUPABASE_PROJECT_REF}.supabase.co/functions/v1" > .env.secrets
 
     # Check if agent already exists
-    if [ -f "livekit.toml" ] && grep -q "^id = " livekit.toml; then
+    if [ -f "livekit.toml" ] && grep -q "^  id = " livekit.toml; then
         # Agent exists - deploy update automatically
-        AGENT_ID=$(grep "^id = " livekit.toml | cut -d'"' -f2)
+        AGENT_ID=$(grep "^  id = " livekit.toml | cut -d'"' -f2)
         echo ""
         echo "📦 Deploying voice agent update (ID: $AGENT_ID)..."
 
