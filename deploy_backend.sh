@@ -42,12 +42,11 @@ supabase secrets set OPENAI_API_KEY="$OPENAI_API_KEY" --project-ref "$SUPABASE_P
 
 # Set LiveKit secrets (optional - only if configured)
 LIVEKIT_CONFIGURED=false
-if [ -n "$LIVEKIT_URL" ] && [ -n "$LIVEKIT_API_KEY" ] && [ -n "$LIVEKIT_API_SECRET" ] && [ -n "$LIVEKIT_AGENT_SECRET" ]; then
+if [ -n "$LIVEKIT_URL" ] && [ -n "$LIVEKIT_API_KEY" ] && [ -n "$LIVEKIT_API_SECRET" ]; then
     supabase secrets set \
         LIVEKIT_URL="$LIVEKIT_URL" \
         LIVEKIT_API_KEY="$LIVEKIT_API_KEY" \
         LIVEKIT_API_SECRET="$LIVEKIT_API_SECRET" \
-        LIVEKIT_AGENT_SECRET="$LIVEKIT_AGENT_SECRET" \
         --project-ref "$SUPABASE_PROJECT_REF" > /dev/null 2>&1
     echo "LiveKit credentials configured"
     LIVEKIT_CONFIGURED=true
@@ -118,8 +117,8 @@ if [ "$LIVEKIT_CONFIGURED" = true ]; then
     echo "   Please run these commands manually:"
     echo ""
     echo "   cd livekit-agent"
-    echo "   lk agent create --subdomain $SUBDOMAIN \\"
-    echo "     --secrets \"BACKEND_URL=https://${SUPABASE_PROJECT_REF}.supabase.co/functions/v1,LIVEKIT_AGENT_SECRET=$LIVEKIT_AGENT_SECRET\""
+    echo "   echo \"BACKEND_URL=https://${SUPABASE_PROJECT_REF}.supabase.co/functions/v1\" > .env.secrets"
+    echo "   lk agent create --subdomain $SUBDOMAIN --secrets-file .env.secrets"
     echo ""
     echo "   This will create a new agent alongside any existing agents in your project."
     echo "   The agent ID will be written to livekit.toml for future deployments."

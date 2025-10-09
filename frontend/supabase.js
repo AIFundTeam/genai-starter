@@ -115,17 +115,15 @@ function unsubscribe(channel) {
 // Edge function invocation
 async function invokeEdgeFunction(functionName, payload = {}) {
     try {
-        console.log(`Invoking edge function: ${functionName}`, payload);
         const { data, error } = await supabaseClient.functions.invoke(functionName, {
             body: payload
         });
-        
+
         if (error) {
             console.error(`Error invoking ${functionName}:`, error);
             throw error;
         }
-        
-        console.log(`Response from ${functionName}:`, data);
+
         return data;
     } catch (error) {
         console.error(`Error invoking edge function ${functionName}:`, error);

@@ -3,30 +3,12 @@
 import { corsHeaders, handleCors } from '../_shared/cors.ts';
 import { callLLM, LLMError } from './logic.ts';
 
-/**
- * Verify agent authentication using shared secret
- */
-function verifyAgentAuth(req: Request): boolean {
-  const agentSecret = req.headers.get('X-Agent-Secret');
-  const expectedSecret = Deno.env.get('LIVEKIT_AGENT_SECRET');
-
-  // If no secret configured, agent auth is disabled
-  if (!expectedSecret) {
-    return false;
-  }
-
-  return agentSecret === expectedSecret;
-}
-
 Deno.serve(async (req) => {
   // Handle CORS preflight
   const corsResponse = handleCors(req);
   if (corsResponse) return corsResponse;
 
   try {
-    // Check authentication (either agent secret or normal user flow)
-    const isAgentAuthenticated = verifyAgentAuth(req);
-
     // Parse request body
     let prompt = 'Hello';
     let user_email = 'anonymous';

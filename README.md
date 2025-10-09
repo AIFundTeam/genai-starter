@@ -97,7 +97,6 @@ Edit `env.config` and fill in your credentials:
 - `LIVEKIT_URL` - Your LiveKit server URL (e.g., wss://your-project.livekit.cloud)
 - `LIVEKIT_API_KEY` - API key from LiveKit project settings
 - `LIVEKIT_API_SECRET` - API secret from LiveKit project settings
-- `LIVEKIT_AGENT_SECRET` - Generate a random secret: `openssl rand -hex 32`
 
 **Note**: Voice features are optional. Leave these blank to skip voice integration.
 
@@ -128,6 +127,46 @@ The deploy scripts automatically handle:
 ### 6. Test Your Setup
 
 Visit your Cloudflare Pages URL and run the built-in tests on the dashboard to verify everything works. If anything fails, copy the error message and ask Claude Code to help debug.
+
+## ⚠️ Security Warning - READ BEFORE PRODUCTION USE
+
+**This is a starter template optimized for rapid prototyping, NOT production security.**
+
+### Current Security Status
+
+All edge functions are **publicly accessible without authentication**:
+- ❌ **Anyone with your Supabase URL can call your functions**
+- ❌ **They can drain your OpenAI API credits** (via `test-llm`)
+- ❌ **They can generate LiveKit tokens** and join voice rooms (via `livekit-token`)
+- ❌ **They can modify your database** (via `increment-counter`)
+
+### Why This Template Has No Auth
+
+The template uses a simple email-only system (no passwords) to help you prototype quickly with Claude Code. This is intentional - authentication complexity would slow down development.
+
+### Before Production Deployment
+
+**YOU MUST add Supabase Auth before deploying with real users or sensitive data:**
+
+1. **Enable Supabase Auth** in your project dashboard (magic links, OAuth, Google, etc.)
+2. **Replace the simple email system** with proper authentication
+3. **Remove `--no-verify-jwt`** from `deploy_backend.sh`
+4. **Edge functions will automatically verify JWT tokens** and reject unauthorized requests
+
+See [Supabase Auth docs](https://supabase.com/docs/guides/auth) for implementation.
+
+### Voice Agent Authentication
+
+For production voice agents, add a **shared secret** for agent-to-backend authentication:
+
+1. Generate a secret: `openssl rand -hex 32`
+2. Add to `env.config` as `LIVEKIT_AGENT_SECRET`
+3. Set in LiveKit Cloud: `lk agent update-secrets --secrets "LIVEKIT_AGENT_SECRET=your-secret"`
+4. Set in Supabase: Add to deploy script's `supabase secrets set` command
+5. In edge functions, verify: `req.headers.get('X-Agent-Secret') === Deno.env.get('LIVEKIT_AGENT_SECRET')`
+6. In agent tools, send: `headers: {"X-Agent-Secret": os.environ.get("LIVEKIT_AGENT_SECRET")}`
+
+This prevents unauthorized agents from accessing your backend while allowing your voice agent to call functions.
 
 ## Start Building with Claude Code
 
@@ -170,19 +209,12 @@ This template includes an optional voice interface powered by LiveKit agents. Us
      - **API Secret** (long string) → Use for `LIVEKIT_API_SECRET`
    - Copy these values - you'll need them for `env.config`
 
-   c. **Generate agent secret**:
-   ```bash
-   openssl rand -hex 32
-   ```
-   - Copy the output → Use for `LIVEKIT_AGENT_SECRET`
-
 2. **Configure Environment**
-   - Add all four LiveKit values to `env.config`:
+   - Add the three LiveKit values to `env.config`:
      ```
      LIVEKIT_URL="wss://your-project.livekit.cloud"
      LIVEKIT_API_KEY="APIxxxxx"
      LIVEKIT_API_SECRET="your-secret-here"
-     LIVEKIT_AGENT_SECRET="generated-hex-here"
      ```
 
 3. **Deploy Backend & Frontend**
@@ -198,7 +230,7 @@ This template includes an optional voice interface powered by LiveKit agents. Us
    ```bash
    cd livekit-agent
    lk agent create --subdomain your-subdomain \
-     --secrets "BACKEND_URL=...,LIVEKIT_AGENT_SECRET=..."
+     --secrets "BACKEND_URL=https://your-project.supabase.co/functions/v1"
    ```
 
    This creates a new agent in your LiveKit project. The agent ID will be saved to `livekit.toml`.

@@ -30,7 +30,7 @@ logger = logging.getLogger("voice-assistant")
 logger.setLevel(logging.INFO)
 
 # Version marker for deployment tracking
-VERSION = "1.0.5"
+VERSION = "1.0.6"
 
 
 def prewarm(proc: JobProcess):
@@ -44,13 +44,9 @@ class VoiceAssistant(Agent):
     def __init__(self) -> None:
         # Get configuration from environment
         self.backend_url = os.environ.get("BACKEND_URL", "").rstrip("/")
-        self.agent_secret = os.environ.get("LIVEKIT_AGENT_SECRET", "")
 
         if not self.backend_url:
             logger.info("BACKEND_URL not set - backend function calls will be disabled")
-
-        if not self.agent_secret:
-            logger.info("LIVEKIT_AGENT_SECRET not set - backend calls may fail authentication")
 
         # Create assistant instructions
         instructions = (
@@ -73,8 +69,8 @@ class VoiceAssistant(Agent):
         This shows the voice agent can call edge functions that interact with the database.
         Returns the new counter value.
         """
-        if not self.backend_url or not self.agent_secret:
-            return "Backend function calls are not configured. Please set BACKEND_URL and LIVEKIT_AGENT_SECRET."
+        if not self.backend_url:
+            return "Backend function calls are not configured. Please set BACKEND_URL."
 
         logger.info("🔧 Tool call: increment_counter()")
 
@@ -82,7 +78,6 @@ class VoiceAssistant(Agent):
             url = f"{self.backend_url}/increment-counter"
             headers = {
                 "Content-Type": "application/json",
-                "X-Agent-Secret": self.agent_secret,
             }
 
             async with httpx.AsyncClient() as client:
@@ -113,8 +108,8 @@ class VoiceAssistant(Agent):
         Call the test-llm edge function to demonstrate calling an LLM from the agent.
         This shows how the voice agent can delegate to other LLMs for specialized tasks.
         """
-        if not self.backend_url or not self.agent_secret:
-            return "Backend function calls are not configured. Please set BACKEND_URL and LIVEKIT_AGENT_SECRET."
+        if not self.backend_url:
+            return "Backend function calls are not configured. Please set BACKEND_URL."
 
         logger.info(f"🔧 Tool call: call_backend_llm(prompt='{prompt}')")
 
@@ -122,7 +117,6 @@ class VoiceAssistant(Agent):
             url = f"{self.backend_url}/test-llm"
             headers = {
                 "Content-Type": "application/json",
-                "X-Agent-Secret": self.agent_secret,
             }
             payload = {
                 "prompt": prompt,
