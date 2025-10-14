@@ -235,10 +235,13 @@ This template includes an optional voice interface powered by LiveKit agents. Us
       cd livekit-agent
       lk cloud auth  # Authenticate with LiveKit Cloud
       lk agent list  # View existing agents (optional)
-      lk agent create --subdomain your-subdomain --secrets-file .env.secrets
+      lk agent create --secrets-file .env.secrets
    ```
 
-   **NOTE**: The `.env.secrets` file is automatically created by `deploy_backend.sh`. Never create it manually!
+   **NOTE**:
+   - The `.env.secrets` file is automatically created by `deploy_backend.sh`
+   - The subdomain is automatically configured in `livekit.toml` from your LiveKit URL
+   - Just copy and paste the exact commands shown by the script!
 
    **Why manual?**
    - LiveKit limits you to 2 agents per project

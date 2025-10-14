@@ -170,7 +170,7 @@ EOF
         echo "   cd livekit-agent"
         echo "   lk cloud auth  # Authenticate with LiveKit Cloud"
         echo "   lk agent list  # View existing agents (optional)"
-        echo "   lk agent create --subdomain $SUBDOMAIN --secrets-file .env.secrets"
+        echo "   lk agent create --secrets-file .env.secrets"
         echo ""
         echo "After creation, run ./deploy_backend.sh again to deploy updates automatically."
         echo ""
