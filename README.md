@@ -214,18 +214,16 @@ This template includes an optional voice interface powered by LiveKit agents. Us
      LIVEKIT_API_SECRET="your-secret-here"
      ```
 
-3. **Deploy Backend**
+3. **Deploy Backend (MUST RUN FIRST)**
    ```bash
-   ./deploy_backend.sh   # Deploys edge functions (+ agent if already created)
+   ./deploy_backend.sh   # This creates the .env.secrets file needed for agent creation
    ```
 
-   **First time:** You'll see instructions to create your voice agent manually (one-time step).
-
-   **After agent is created:** Every `./deploy_backend.sh` automatically redeploys your agent!
+   **Important:** This script MUST be run before creating the agent, as it generates the `.env.secrets` file.
 
 4. **Create Voice Agent** (one-time manual step)
 
-   The first time you run `./deploy_backend.sh`, you'll see:
+   After running `./deploy_backend.sh`, you'll see instructions with the exact commands to run:
 
    ```
    📝 Voice agent setup (one-time manual step):
@@ -239,6 +237,8 @@ This template includes an optional voice interface powered by LiveKit agents. Us
       lk agent list  # View existing agents (optional)
       lk agent create --subdomain your-subdomain --secrets-file .env.secrets
    ```
+
+   **NOTE**: The `.env.secrets` file is automatically created by `deploy_backend.sh`. Never create it manually!
 
    **Why manual?**
    - LiveKit limits you to 2 agents per project

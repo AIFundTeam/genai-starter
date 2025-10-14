@@ -34,6 +34,9 @@ npm install -g wrangler
 
 # Install Git (if not already installed)
 brew install git
+
+# Install LiveKit CLI (optional - for voice features)
+brew install livekit
 ```
 
 
