@@ -13,7 +13,31 @@ This is a full-stack web application template built with:
 - **AI/LLM**: OpenAI API integration (required)
 - **Voice**: LiveKit voice agents (optional)
 
-## Key Commands
+## 🚀 Quick Setup Sequence
+
+**Run these commands in order when setting up or making schema changes:**
+
+```bash
+# 1. Configure environment (run once)
+cp env.config.template env.config
+# Edit env.config with your credentials
+
+# 2. Setup database (run after schema changes)
+./setup_database.sh
+
+# 3. Deploy backend
+./deploy_backend.sh
+
+# 4. Deploy frontend
+./deploy_frontend.sh
+
+# 5. Run tests (after making changes)
+./test_functions.sh
+```
+
+**Important**: `setup_database.sh` must run before testing or using the app.
+
+## 📖 Command Reference
 
 ```bash
 # Initial setup (run once)
@@ -434,6 +458,7 @@ customElements.define('my-page-app', MyPageApp);
 
 4. **New Database Table**
    - Add to sql/schema.sql
+   - **Run ./setup_database.sh** to apply changes
    - Include RLS policies
    - Add indexes for performance
    - Enable realtime if needed
@@ -605,9 +630,12 @@ The template includes an optional voice interface powered by LiveKit agents:
 
 ### Deployment
 
-1. Deploy backend first with `./deploy_backend.sh` (automatically handles all setup)
-2. Deploy frontend with `./deploy_frontend.sh` (automatically handles all setup)
-3. Monitor logs in Supabase and Cloudflare dashboards
+**Deploy in this order:**
+
+1. **Database first** with `./setup_database.sh` (creates/updates schema)
+2. **Backend second** with `./deploy_backend.sh` (deploys Edge Functions, sets secrets)
+3. **Frontend last** with `./deploy_frontend.sh` (deploys UI, generates env.js)
+4. Monitor logs in Supabase and Cloudflare dashboards
 
 ### Troubleshooting
 
