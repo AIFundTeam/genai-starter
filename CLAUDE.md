@@ -25,13 +25,16 @@ cp env.config.template env.config
 # 2. Setup database (run after schema changes)
 ./setup_database.sh
 
-# 3. Deploy backend
-./deploy_backend.sh
+# 3. Deploy Supabase backend (Edge Functions)
+./deploy_supabase.sh
 
-# 4. Deploy frontend
+# 4. Deploy LiveKit agent (optional, only if using voice features)
+./deploy_livekit.sh
+
+# 5. Deploy frontend
 ./deploy_frontend.sh
 
-# 5. Run tests (after making changes)
+# 6. Run tests (after making changes)
 ./test_functions.sh
 ```
 
@@ -47,8 +50,11 @@ cp env.config.template env.config
 # Database setup
 ./setup_database.sh
 
-# Deploy backend (Supabase Edge Functions)
-./deploy_backend.sh
+# Deploy Supabase backend (Edge Functions)
+./deploy_supabase.sh
+
+# Deploy LiveKit agent (optional, only after agent changes)
+./deploy_livekit.sh
 
 # Deploy frontend (Cloudflare Pages)
 ./deploy_frontend.sh
@@ -59,6 +65,20 @@ cp env.config.template env.config
 # Deploy specific function
 supabase functions deploy <function-name> --project-ref $SUPABASE_PROJECT_REF
 ```
+
+## 🎙️ When to Deploy LiveKit Agent
+
+**Run `./deploy_livekit.sh` only when you modify voice agent files:**
+- `livekit-agent/agent.py` - Agent code changes
+- `livekit-agent/requirements.txt` - Python dependency changes
+- `livekit-agent/Dockerfile` - Container configuration changes
+
+**Skip if you're only modifying:**
+- Edge Functions (use `./deploy_supabase.sh` instead)
+- Frontend code (use `./deploy_frontend.sh` instead)
+- Database schema (use `./setup_database.sh` instead)
+
+**Note:** LiveKit deployment is slower (~30-60 seconds) and should only be run when the agent itself changes. The `deploy_supabase.sh` script will remind you if LiveKit is configured.
 
 ## 🧪 Test-Driven Development (CRITICAL)
 
@@ -239,7 +259,8 @@ template/
 │   └── livekit.toml      # LiveKit config (auto-generated/synced)
 ├── sql/
 │   └── schema.sql         # Database schema
-├── deploy_backend.sh      # Backend deployment script
+├── deploy_supabase.sh     # Supabase Edge Functions deployment
+├── deploy_livekit.sh      # LiveKit voice agent deployment
 ├── deploy_frontend.sh     # Frontend deployment script
 ├── setup-env.sh           # Environment setup script
 ├── env.config.template    # Configuration template
@@ -454,7 +475,7 @@ customElements.define('my-page-app', MyPageApp);
    - Create folder in supabase/functions/
    - Copy structure from test-llm
    - Import CORS from _shared/cors.ts
-   - Deploy with deploy_backend.sh
+   - Deploy with deploy_supabase.sh
 
 4. **New Database Table**
    - Add to sql/schema.sql
@@ -633,9 +654,10 @@ The template includes an optional voice interface powered by LiveKit agents:
 **Deploy in this order:**
 
 1. **Database first** with `./setup_database.sh` (creates/updates schema)
-2. **Backend second** with `./deploy_backend.sh` (deploys Edge Functions, sets secrets)
-3. **Frontend last** with `./deploy_frontend.sh` (deploys UI, generates env.js)
-4. Monitor logs in Supabase and Cloudflare dashboards
+2. **Supabase backend** with `./deploy_supabase.sh` (deploys Edge Functions, sets secrets)
+3. **LiveKit agent** with `./deploy_livekit.sh` (optional, only after agent changes)
+4. **Frontend last** with `./deploy_frontend.sh` (deploys UI, generates env.js)
+5. Monitor logs in Supabase, LiveKit, and Cloudflare dashboards
 
 ### Troubleshooting
 
@@ -674,5 +696,12 @@ The template includes an optional voice interface powered by LiveKit agents:
    - Backend logic second
    - Frontend UI last
    - Test everything
+
+6. **Deployment Reminders**
+   - After modifying Edge Functions → Remind: `./deploy_supabase.sh`
+   - After modifying agent.py → Remind: `./deploy_livekit.sh`
+   - After modifying frontend → Remind: `./deploy_frontend.sh`
+   - After modifying schema.sql → Remind: `./setup_database.sh`
+   - Don't automatically run deployment scripts unless explicitly asked
 
 Remember: This is a Claude Code-first starter. Users expect fast, high-quality development with AI assistance. Deliver on that promise.

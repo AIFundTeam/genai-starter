@@ -45,7 +45,8 @@ cp env.config.template env.config
 
 ```bash
 ./setup_database.sh      # ⚠️ WARNING: Drops and recreates tables (deletes all data)
-./deploy_backend.sh      # Deploys Edge Functions
+./deploy_supabase.sh     # Deploys Supabase Edge Functions
+./deploy_livekit.sh      # (Optional) Deploys voice agent - only if using LiveKit
 ./deploy_frontend.sh     # Deploys to Cloudflare Pages
 ```
 
@@ -59,7 +60,7 @@ Visit your Cloudflare Pages URL and run the built-in tests. If anything fails, a
 
 All Edge Functions are publicly accessible (no auth). Anyone with your Supabase URL can drain your OpenAI credits or modify your database.
 
-**Before production**: Enable [Supabase Auth](https://supabase.com/docs/guides/auth), remove `--no-verify-jwt` from `deploy_backend.sh`, and add proper authentication to your voice agent.
+**Before production**: Enable [Supabase Auth](https://supabase.com/docs/guides/auth), remove `--no-verify-jwt` from `deploy_supabase.sh`, and add proper authentication to your voice agent.
 
 ## Start Building with Claude Code
 
@@ -87,18 +88,18 @@ Browser-based voice interaction powered by LiveKit agents. Includes STT, LLM, TT
 
 **2. Deploy & Create Agent**
 ```bash
-./deploy_backend.sh          # Run first to create .env.secrets
+./deploy_livekit.sh          # Run first to create .env.secrets
 cd livekit-agent
 lk cloud auth                # Authenticate (one-time)
 lk agent create --secrets-file .env.secrets  # Create agent (one-time)
-cd .. && ./deploy_backend.sh # Run again to complete setup
+cd .. && ./deploy_livekit.sh # Run again to complete setup
 ./deploy_frontend.sh         # Deploy frontend
 ```
 
 **3. Update Agent Code**
 Edit `livekit-agent/agent.py`, then:
 ```bash
-./deploy_backend.sh   # Automatically redeploys everything
+./deploy_livekit.sh   # Redeploys voice agent
 ```
 
 Test locally: `cd livekit-agent && python agent.py dev`

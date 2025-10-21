@@ -32,10 +32,14 @@ This directory contains the Python voice agent for the genai-starter template.
 
 4. **Deploy to LiveKit Cloud**
    ```bash
-   lk agent deploy
+   # From project root:
+   ./deploy_livekit.sh
+
+   # Or manually from this directory:
+   lk agent deploy --secrets-file .env.secrets
    ```
 
-   After deployment, update `livekit.toml` with the assigned subdomain and agent ID.
+   The deploy_livekit.sh script automatically handles subdomain sync and secrets file generation.
 
 ## Configuration
 
