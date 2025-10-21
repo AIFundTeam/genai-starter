@@ -106,16 +106,31 @@ window.SUPABASE_ANON_KEY = '${SUPABASE_ANON_KEY}';
 EOF
     
     # Generate .mcp.json for MCP servers
+    SHOULD_REGENERATE=false
+
+    # Check if .mcp.json needs to be regenerated
     if [ ! -f ".mcp.json" ]; then
+        SHOULD_REGENERATE=true
+    elif [ -f ".mcp.json" ]; then
+        # Check if project-ref or access token has changed
+        CURRENT_PROJECT_REF=$(grep -o "project-ref=[^\"]*" .mcp.json | cut -d= -f2 || echo "")
+        CURRENT_ACCESS_TOKEN=$(grep -A 1 "SUPABASE_ACCESS_TOKEN" .mcp.json | tail -1 | grep -o '".*"' | tr -d '"' || echo "")
+
+        if [ "$CURRENT_PROJECT_REF" != "$SUPABASE_PROJECT_REF" ] || [ "$CURRENT_ACCESS_TOKEN" != "$SUPABASE_ACCESS_TOKEN" ]; then
+            SHOULD_REGENERATE=true
+        fi
+    fi
+
+    if [ "$SHOULD_REGENERATE" = true ]; then
         # Detect OS and set appropriate command
         MCP_COMMAND="npx"
         if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "win32" ]] || [[ "$OSTYPE" == "cygwin" ]]; then
             MCP_COMMAND="npx.cmd"
         fi
-        
+
         # Copy template and substitute variables
         cp .mcp.json.template .mcp.json
-        
+
         # Use sed to replace placeholders
         if [[ "$OSTYPE" == "darwin"* ]]; then
             # macOS requires -i '' for in-place editing
