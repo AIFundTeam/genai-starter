@@ -235,9 +235,16 @@ async def entrypoint(ctx: JobContext):
 
 
 if __name__ == "__main__":
+    # Get agent name from PROJECT_NAME environment variable
+    project_name = os.getenv("PROJECT_NAME", "genai-starter")
+    agent_name = f"{project_name}-voice"
+
+    logger.info(f"Starting agent with name: {agent_name}")
+
     cli.run_app(
         WorkerOptions(
             entrypoint_fnc=entrypoint,
             prewarm_fnc=prewarm,
+            agent_name=agent_name,
         )
     )

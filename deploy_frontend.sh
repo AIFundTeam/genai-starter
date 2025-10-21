@@ -16,7 +16,7 @@ echo "Deploying frontend..."
 if [ -f "env.config" ]; then
     echo "Loading environment..."
     source setup-env.sh
-    if [ -z "$CLOUDFLARE_PROJECT_NAME" ] || [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+    if [ -z "$PROJECT_NAME" ] || [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
         echo -e "${RED}Error: Failed to load environment variables!${NC}"
         echo "Please check your env.config file"
         exit 1
@@ -39,10 +39,10 @@ if [ ! -f "frontend/env.js" ]; then
 fi
 
 # Check if project exists, create if it doesn't
-PROJECT_CHECK=$(wrangler pages project list 2>&1 | grep -w "$CLOUDFLARE_PROJECT_NAME" || true)
+PROJECT_CHECK=$(wrangler pages project list 2>&1 | grep -w "$PROJECT_NAME" || true)
 
 if [ -z "$PROJECT_CHECK" ]; then
-    wrangler pages project create "$CLOUDFLARE_PROJECT_NAME" --production-branch=main > /dev/null 2>&1
+    wrangler pages project create "$PROJECT_NAME" --production-branch=main > /dev/null 2>&1
     if [ $? -ne 0 ]; then
         echo "❌ Failed to create Cloudflare Pages project"
         exit 1
@@ -50,7 +50,7 @@ if [ -z "$PROJECT_CHECK" ]; then
 fi
 
 # Deploy the frontend and capture output
-DEPLOY_OUTPUT=$(wrangler pages deploy "$FRONTEND_DIR" --project-name="$CLOUDFLARE_PROJECT_NAME" 2>&1)
+DEPLOY_OUTPUT=$(wrangler pages deploy "$FRONTEND_DIR" --project-name="$PROJECT_NAME" 2>&1)
 
 DEPLOY_STATUS=$?
 if [ $DEPLOY_STATUS -ne 0 ]; then

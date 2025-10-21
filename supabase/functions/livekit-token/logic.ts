@@ -45,10 +45,14 @@ export async function generateLiveKitToken(
     );
   }
 
+  // Get project name for agent dispatch
+  const projectName = Deno.env.get("PROJECT_NAME") || "genai-starter";
+  const agentName = `${projectName}-voice`;
+
   // Generate room name if not provided
   const finalRoomName = room_name || `room-${Date.now()}`;
 
-  // Create JWT payload
+  // Create JWT payload with agent dispatch
   const now = Math.floor(Date.now() / 1000);
   const payload = {
     iss: livekitApiKey,
@@ -60,6 +64,14 @@ export async function generateLiveKitToken(
       roomJoin: true,
       canPublish: true,
       canSubscribe: true,
+    },
+    roomConfig: {
+      // Dispatch the project-specific agent when participant joins
+      agents: [
+        {
+          agentName: agentName
+        }
+      ]
     },
   };
 

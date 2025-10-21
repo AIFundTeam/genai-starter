@@ -38,7 +38,10 @@ if [ ! -f "supabase/.temp/project-ref" ] || [ "$(cat supabase/.temp/project-ref 
 fi
 
 # Set secrets for edge functions
-supabase secrets set OPENAI_API_KEY="$OPENAI_API_KEY" --project-ref "$SUPABASE_PROJECT_REF" > /dev/null 2>&1
+supabase secrets set \
+    OPENAI_API_KEY="$OPENAI_API_KEY" \
+    PROJECT_NAME="$PROJECT_NAME" \
+    --project-ref "$SUPABASE_PROJECT_REF" > /dev/null 2>&1
 
 # Set LiveKit secrets (optional - only if configured)
 LIVEKIT_CONFIGURED=false
@@ -141,8 +144,11 @@ EOF
         fi
     fi
 
-    # Create .env.secrets file with backend URL
-    echo "BACKEND_URL=https://${SUPABASE_PROJECT_REF}.supabase.co/functions/v1" > .env.secrets
+    # Create .env.secrets file with backend URL and project name
+    cat > .env.secrets <<EOF
+BACKEND_URL=https://${SUPABASE_PROJECT_REF}.supabase.co/functions/v1
+PROJECT_NAME=${PROJECT_NAME}
+EOF
 
     # Check if agent already exists
     if [ -f "livekit.toml" ] && grep -q "^  id = " livekit.toml; then
