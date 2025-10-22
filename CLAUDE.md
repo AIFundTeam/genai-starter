@@ -561,6 +561,62 @@ The template includes an optional voice interface powered by LiveKit agents:
 3. Add custom tools in `agent.py` to call your edge functions
 4. Use shared secret for authentication (automatically handled by deploy script)
 
+### Voice Agent Module
+
+The template includes `frontend/voice-utils.js` - a complete voice interface module that isolates all LiveKit functionality.
+
+**VoiceManager Class** - Main interface for voice features:
+- `checkAvailability(userEmail)` - Check if voice features are available
+- `loadSDK()` - Load LiveKit SDK dynamically
+- `connect(userEmail, audioContainer)` - Connect to voice room
+- `disconnect()` - Disconnect from voice room
+- `toggle(userEmail, audioContainer)` - Toggle connection state
+
+**VoiceManager Callbacks** (passed to constructor):
+- `onStatusUpdate(message)` - Called on status changes
+- `onConnectionChange(connected)` - Called on connect/disconnect
+- `onTranscript(speaker, text)` - Called when transcript received
+- `onDataMessage(data)` - Called for all data channel messages
+
+**Helper Functions:**
+- `publishMicrophoneTrack(room, LivekitClient)` - Creates and publishes microphone track
+- `formatTranscriptEntry(speaker, text)` - Format transcript with timestamp
+- `createTranscriptHTML(entry)` - Generate HTML for transcript entries
+- `addTranscriptEntry(container, entry)` - Add entry to DOM with auto-scroll
+- `handleDataChannelMessage(payload, participant)` - Parse binary messages from agent
+
+**Usage Example:**
+```javascript
+import { VoiceManager, formatTranscriptEntry, addTranscriptEntry } from '../voice-utils.js';
+
+// Create manager with UI callbacks
+const voiceManager = new VoiceManager({
+  onStatusUpdate: (status) => updateStatusDisplay(status),
+  onConnectionChange: (connected) => updateButtonState(connected),
+  onTranscript: (speaker, text) => {
+    const entry = formatTranscriptEntry(speaker, text);
+    addTranscriptEntry(transcriptContainer, entry);
+  },
+  onDataMessage: (data) => console.log('Data:', data),
+});
+
+// Check availability and load SDK
+const { available } = await voiceManager.checkAvailability(userEmail);
+if (available) {
+  await voiceManager.loadSDK();
+}
+
+// Connect/disconnect
+await voiceManager.connect(userEmail, audioContainer);
+await voiceManager.disconnect();
+```
+
+**Benefits of VoiceManager:**
+- All voice logic isolated in one module
+- Simple callback-based UI integration
+- No LiveKit implementation details in app code
+- Easy to test and maintain
+
 ### Common User Requests and How to Handle Them
 
 1. **"Build a [todo/notes/task/etc] app"**

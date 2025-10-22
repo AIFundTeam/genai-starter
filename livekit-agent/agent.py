@@ -8,6 +8,7 @@ This agent provides voice interaction with the following features:
 - Custom tool to call test-llm edge function
 """
 import asyncio
+import json
 import logging
 import os
 from typing import Annotated
@@ -30,7 +31,7 @@ logger = logging.getLogger("voice-assistant")
 logger.setLevel(logging.INFO)
 
 # Version marker for deployment tracking
-VERSION = "1.0.6"
+VERSION = "1.1.0"  # Clean minimal transcript implementation
 
 
 def prewarm(proc: JobProcess):
@@ -41,7 +42,10 @@ def prewarm(proc: JobProcess):
 class VoiceAssistant(Agent):
     """Voice assistant that can answer questions and call backend functions"""
 
-    def __init__(self) -> None:
+    def __init__(self, ctx: JobContext = None) -> None:
+        # Store context for sending data messages
+        self.ctx = ctx
+
         # Get configuration from environment
         self.backend_url = os.environ.get("BACKEND_URL", "").rstrip("/")
 
@@ -156,8 +160,8 @@ async def entrypoint(ctx: JobContext):
     # Logging setup
     logger.info(f"Starting voice agent v{VERSION} for room {ctx.room.name}")
 
-    # Create the assistant
-    assistant = VoiceAssistant()
+    # Create the assistant with context for data channel access
+    assistant = VoiceAssistant(ctx=ctx)
 
     # Create agent session with LiveKit Inference for STT, LLM, and TTS
     session = AgentSession(
@@ -169,14 +173,45 @@ async def entrypoint(ctx: JobContext):
         preemptive_generation=True,  # Generate responses while user is still speaking
     )
 
-    # Add event listeners for monitoring
-    @session.on("user_speech_committed")
-    def on_user_speech(ev):
-        logger.info(f"🎤 User said: {ev.alternatives[0].text if ev.alternatives else 'N/A'}")
+    # Add event listeners for transcript sending
+    @session.on("user_input_transcribed")
+    def on_user_transcribed(ev):
+        """Handle user transcript events - only final transcripts"""
+        if not ev.is_final:
+            return  # Skip partial transcripts
 
-    @session.on("agent_speech_committed")
-    def on_agent_speech(ev):
-        logger.info(f"🔊 Agent said: {ev.alternatives[0].text if ev.alternatives else 'N/A'}")
+        text = ev.transcript
+        logger.info(f"🎤 User said: {text}")
+
+        # Send to frontend via data channel
+        message = json.dumps({"type": "transcript", "speaker": "user", "text": text})
+        asyncio.create_task(
+            ctx.room.local_participant.publish_data(message.encode(), reliable=True)
+        )
+
+    @session.on("conversation_item_added")
+    def on_conversation_item(ev):
+        """Handle agent messages from conversation"""
+        item = ev.item
+
+        # Only process assistant messages
+        if item.role != 'assistant':
+            return
+
+        # Extract text content
+        content = item.content
+        if isinstance(content, list):
+            text = ' '.join(str(c) for c in content)
+        else:
+            text = str(content)
+
+        logger.info(f"🔊 Agent said: {text}")
+
+        # Send to frontend via data channel
+        message = json.dumps({"type": "transcript", "speaker": "agent", "text": text})
+        asyncio.create_task(
+            ctx.room.local_participant.publish_data(message.encode(), reliable=True)
+        )
 
     @session.on("agent_started_speaking")
     def on_agent_started_speaking(ev):
@@ -218,13 +253,31 @@ async def entrypoint(ctx: JobContext):
     # Join the room and connect to the user
     await ctx.connect()
 
+    # Data Flow: Extract user identity from JWT token
+    # The livekit-token function puts user_email in the JWT 'sub' claim,
+    # which becomes the participant's identity in LiveKit
+    logger.info("Waiting for user participant...")
+    await ctx.wait_for_participant()
+
+    # Get user identity (email) from participant
+    remote_participants = list(ctx.room.remote_participants.values())
+    user_identity = remote_participants[0].identity if remote_participants else "unknown"
+    logger.info(f"✅ User connected: {user_identity}")
+
     # Wait for everything to be fully ready
     await asyncio.sleep(1.0)
 
-    # Greet user
-    logger.info("Generating greeting...")
-    session.generate_reply(
-        instructions="Give a brief, friendly greeting. Tell the user you can help answer questions and demonstrate calling backend functions. Keep it under 2 sentences."
+    # Send identity confirmation via data channel
+    message = json.dumps({
+        "type": "identity_confirmed",
+        "user_email": user_identity,
+    })
+    await ctx.room.local_participant.publish_data(message.encode(), reliable=True)
+
+    # Greet user with their identity
+    logger.info("Generating personalized greeting...")
+    await session.generate_reply(
+        instructions=f"Give a brief, friendly greeting to the user with email {user_identity}. Tell them you can help answer questions and demonstrate calling backend functions. Keep it under 2 sentences."
     )
 
     # Add shutdown callback

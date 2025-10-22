@@ -1,20 +1,23 @@
 // Main app page application logic with Shadow DOM
 import { styles } from './css.js';
+import {
+  VoiceManager,
+  formatTranscriptEntry,
+  addTranscriptEntry,
+} from '../voice-utils.js';
 
 class MainApp extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
-    this.voiceRoom = null;
-    this.isVoiceConnected = false;
-    this.remoteAudioElement = null;
+    this.voiceManager = null;
   }
 
   connectedCallback() {
     this.render();
     this.initializeEventListeners();
     this.initializeUserManagement();
-    this.checkVoiceAvailability();
+    this.initializeVoiceManager();
   }
 
   render() {
@@ -149,9 +152,17 @@ class MainApp extends HTMLElement {
 
           <div class="voice-info" id="voice-info" style="display: none;">
             <p><strong>💡 Try saying:</strong></p>
-            <p>• "Can you call the backend LLM and say hello?"</p>
+            <p>• "Can you test the database?"</p>
             <p>• "What can you help me with?"</p>
             <p>• "Tell me about this application"</p>
+          </div>
+
+          <div class="transcript-container" id="transcript-container" style="display: none;">
+            <div class="transcript-header">
+              <h4>📝 Conversation Transcript</h4>
+              <button id="clear-transcript-btn" class="btn btn-small">Clear</button>
+            </div>
+            <div class="transcript-log" id="transcript-log"></div>
           </div>
 
           <div id="remote-audio-container" aria-hidden="true" style="position: absolute; width: 0; height: 0; overflow: hidden;"></div>
@@ -177,6 +188,13 @@ class MainApp extends HTMLElement {
     // Voice button
     const voiceBtn = this.shadowRoot.getElementById('voice-button');
     voiceBtn.addEventListener('click', () => this.toggleVoice());
+
+    // Clear transcript button
+    const clearTranscriptBtn = this.shadowRoot.getElementById('clear-transcript-btn');
+    clearTranscriptBtn?.addEventListener('click', () => {
+      const transcriptLog = this.shadowRoot.getElementById('transcript-log');
+      if (transcriptLog) transcriptLog.innerHTML = '';
+    });
   }
 
   initializeUserManagement() {
@@ -194,11 +212,46 @@ class MainApp extends HTMLElement {
     }
   }
 
-  async checkVoiceAvailability() {
+  async initializeVoiceManager() {
     const voiceStatusCard = this.shadowRoot.getElementById('voice-status-card');
     const voiceBadge = this.shadowRoot.getElementById('voice-badge');
     const voiceSection = this.shadowRoot.querySelector('.voice-section');
+    const transcriptLog = this.shadowRoot.getElementById('transcript-log');
 
+    // Create VoiceManager with UI callbacks
+    this.voiceManager = new VoiceManager({
+      onStatusUpdate: (status) => this.updateVoiceStatus(status),
+      onConnectionChange: (connected) => {
+        const voiceBtn = this.shadowRoot.getElementById('voice-button');
+        const voiceInfo = this.shadowRoot.getElementById('voice-info');
+        const transcriptContainer = this.shadowRoot.getElementById('transcript-container');
+
+        if (connected) {
+          voiceBtn.classList.add('connected');
+          voiceInfo.style.display = 'block';
+          voiceInfo.innerHTML = `
+            <p><strong>💡 Try saying:</strong></p>
+            <p>• "Can you test the database?"</p>
+            <p>• "What can you help me with?"</p>
+            <p>• "Tell me about this application"</p>
+          `;
+          if (transcriptContainer) transcriptContainer.style.display = 'block';
+        } else {
+          voiceBtn.classList.remove('connected');
+          voiceInfo.style.display = 'none';
+          if (transcriptContainer) transcriptContainer.style.display = 'none';
+        }
+        voiceBtn.disabled = false;
+      },
+      onTranscript: (speaker, text) => {
+        if (transcriptLog) {
+          const entry = formatTranscriptEntry(speaker, text);
+          addTranscriptEntry(transcriptLog, entry);
+        }
+      },
+    });
+
+    // Check availability
     try {
       const userEmail = localStorage.getItem('userEmail');
       if (!userEmail) {
@@ -206,18 +259,9 @@ class MainApp extends HTMLElement {
         return;
       }
 
-      const supabaseUrl = window.SUPABASE_URL;
-      const response = await fetch(`${supabaseUrl}/functions/v1/livekit-token`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          user_email: userEmail,
-        }),
-      });
+      const { available, configured } = await this.voiceManager.checkAvailability(userEmail);
 
-      if (response.status === 501) {
+      if (!configured) {
         // LiveKit not configured
         voiceStatusCard.classList.remove('status-enabled');
         voiceStatusCard.classList.add('status-disabled');
@@ -227,7 +271,7 @@ class MainApp extends HTMLElement {
 
         const voiceHeader = voiceStatusCard.querySelector('h4');
         voiceHeader.textContent = '⏸️ Voice Interface (LiveKit)';
-      } else if (response.ok) {
+      } else if (available) {
         // LiveKit configured - enable it
         voiceStatusCard.classList.remove('status-disabled');
         voiceStatusCard.classList.add('status-enabled');
@@ -244,7 +288,7 @@ class MainApp extends HTMLElement {
         }
 
         // Load SDK
-        this.loadLiveKitSDK();
+        await this.voiceManager.loadSDK();
       }
     } catch (error) {
       console.error('Error checking voice availability:', error);
@@ -252,221 +296,21 @@ class MainApp extends HTMLElement {
     }
   }
 
-  loadLiveKitSDK() {
-    // Check if LiveKit SDK is already loaded
-    if (window.LivekitClient) {
-      return;
-    }
-
-    // Load LiveKit client SDK
-    const clientScript = document.createElement('script');
-    clientScript.src = 'https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js';
-    clientScript.onload = () => {};
-    clientScript.onerror = () => {
-      console.error('Failed to load LiveKit SDK');
-      this.updateVoiceStatus('Failed to load voice SDK', true);
-    };
-    document.head.appendChild(clientScript);
-  }
-
   async toggleVoice() {
-    if (this.isVoiceConnected) {
-      await this.disconnectVoice();
-    } else {
-      await this.connectVoice();
-    }
-  }
-
-  async connectVoice() {
     const voiceBtn = this.shadowRoot.getElementById('voice-button');
-    const voiceInfo = this.shadowRoot.getElementById('voice-info');
+    const audioContainer = this.shadowRoot.getElementById('remote-audio-container');
 
     try {
       voiceBtn.disabled = true;
-      this.updateVoiceStatus('Connecting...');
-
-      // Check if LiveKit SDK is loaded
-      if (!window.LivekitClient) {
-        throw new Error('LiveKit SDK not loaded');
-      }
-
-      // Get user email
       const userEmail = localStorage.getItem('userEmail');
-      if (!userEmail) {
-        throw new Error('User not logged in');
-      }
-
-      // Request access token from backend
-      const supabaseUrl = window.SUPABASE_URL;
-      const tokenResponse = await fetch(`${supabaseUrl}/functions/v1/livekit-token`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          user_email: userEmail,
-        }),
-      });
-
-      if (!tokenResponse.ok) {
-        const errorData = await tokenResponse.json();
-        if (tokenResponse.status === 501) {
-          // LiveKit not configured
-          this.updateVoiceStatus('Voice not configured', true);
-          voiceInfo.innerHTML = `
-            <p><strong>⚙️ Voice interface not configured</strong></p>
-            <p>To enable voice features:</p>
-            <ol style="padding-left: 1.5rem; margin: 0.5rem 0;">
-              <li>Sign up at <a href="https://cloud.livekit.io/" target="_blank">LiveKit Cloud</a></li>
-              <li>Add credentials to env.config</li>
-              <li>Deploy backend with ./deploy_backend.sh</li>
-              <li>Deploy agent: cd livekit-agent && lk agent deploy</li>
-            </ol>
-          `;
-          voiceInfo.style.display = 'block';
-          voiceBtn.disabled = false;
-          return;
-        }
-        throw new Error(errorData.error || 'Failed to get token');
-      }
-
-      const { token, url, room_name } = await tokenResponse.json();
-
-      // Create LiveKit room
-      this.voiceRoom = new window.LivekitClient.Room();
-      const { RoomEvent, RemoteParticipant } = window.LivekitClient;
-
-      // Set up event listeners
-      this.voiceRoom.on(RoomEvent.Disconnected, () => {
-        this.isVoiceConnected = false;
-        voiceBtn.classList.remove('connected');
-        voiceBtn.disabled = false;
-        this.updateVoiceStatus('Disconnected');
-        voiceInfo.style.display = 'none';
-        if (this.remoteAudioElement) {
-          this.remoteAudioElement.remove();
-          this.remoteAudioElement = null;
-        }
-      });
-
-      this.voiceRoom.on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
-        if (track.kind === 'audio' && participant instanceof RemoteParticipant) {
-          const audioElement = track.attach();
-          audioElement.autoplay = true;
-          const container = this.shadowRoot.getElementById('remote-audio-container');
-          if (container && !container.contains(audioElement)) {
-            container.appendChild(audioElement);
-          }
-          const playPromise = audioElement.play();
-          if (playPromise) {
-            playPromise.catch((err) => {
-              console.warn('Voice playback blocked by browser policy', err);
-            });
-          }
-          this.remoteAudioElement = audioElement;
-        }
-      });
-
-      this.voiceRoom.on(RoomEvent.TrackUnsubscribed, (track) => {
-        if (track.kind === 'audio') {
-          track.detach();
-          if (this.remoteAudioElement) {
-            this.remoteAudioElement.remove();
-            this.remoteAudioElement = null;
-          }
-        }
-      });
-
-      // Connect to room
-      await this.voiceRoom.connect(url, token);
-
-      // Enable audio playback (required by some browsers)
-      try {
-        await this.voiceRoom.startAudio();
-      } catch (err) {
-        console.warn('Audio playback requires user interaction:', err);
-      }
-
-      // Wait for room to be fully ready and agent to connect
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // Ensure already subscribed audio tracks attach
-      this.voiceRoom.remoteParticipants.forEach((participant) => {
-        if (!participant?.audioTracks) return;
-        participant.audioTracks.forEach((publication) => {
-          const track = publication?.track;
-          if (!track) return;
-          const audioElement = track.attach();
-          audioElement.autoplay = true;
-          const container = this.shadowRoot.getElementById('remote-audio-container');
-          if (container && !container.contains(audioElement)) {
-            container.appendChild(audioElement);
-          }
-          const playPromise = audioElement.play();
-          if (playPromise) {
-            playPromise.catch((err) => console.warn('Voice playback blocked by browser policy', err));
-          }
-          this.remoteAudioElement = audioElement;
-        });
-      });
-
-      // Create and publish microphone track with agent-friendly settings
-      const micTrack = await window.LivekitClient.createLocalAudioTrack({
-        echoCancellation: true,
-        noiseSuppression: true,
-        autoGainControl: true,
-      });
-
-      // Publish the track with explicit source
-      await this.voiceRoom.localParticipant.publishTrack(micTrack, {
-        source: window.LivekitClient.Track.Source.Microphone,
-        name: 'microphone',
-      });
-
-      // Update UI
-      this.isVoiceConnected = true;
-      voiceBtn.classList.add('connected');
-      voiceBtn.disabled = false;
-      this.updateVoiceStatus('Connected - Speak now', false);
-      voiceInfo.style.display = 'block';
-      voiceInfo.innerHTML = `
-        <p><strong>💡 Try saying:</strong></p>
-        <p>• "Can you test the database?"</p>
-        <p>• "What can you help me with?"</p>
-        <p>• "Tell me about this application"</p>
-      `;
+      await this.voiceManager.toggle(userEmail, audioContainer);
     } catch (error) {
-      console.error('Error connecting to voice:', error);
+      console.error('Error toggling voice:', error);
       this.updateVoiceStatus(error.message || 'Connection failed', true);
       voiceBtn.disabled = false;
     }
   }
 
-  async disconnectVoice() {
-    const voiceBtn = this.shadowRoot.getElementById('voice-button');
-    const voiceInfo = this.shadowRoot.getElementById('voice-info');
-
-    try {
-      this.updateVoiceStatus('Disconnecting...');
-
-      if (this.voiceRoom) {
-        if (this.remoteAudioElement) {
-          this.remoteAudioElement.remove();
-          this.remoteAudioElement = null;
-        }
-        await this.voiceRoom.disconnect();
-        this.voiceRoom = null;
-      }
-
-      this.isVoiceConnected = false;
-      voiceBtn.classList.remove('connected');
-      this.updateVoiceStatus('Disconnected');
-      voiceInfo.style.display = 'none';
-    } catch (error) {
-      console.error('Error disconnecting:', error);
-      this.updateVoiceStatus('Error disconnecting', true);
-    }
-  }
 
   updateVoiceStatus(message, isError = false) {
     const statusEl = this.shadowRoot.getElementById('voice-status');
