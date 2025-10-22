@@ -61,7 +61,7 @@ export function assertValidResponse(
 /**
  * Test CORS preflight request
  */
-export async function testCorsPrefligh(functionUrl: string): Promise<Response> {
+export async function testCorsPreflight(functionUrl: string): Promise<Response> {
   const response = await fetch(functionUrl, {
     method: "OPTIONS",
     headers: {

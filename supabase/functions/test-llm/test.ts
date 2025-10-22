@@ -4,7 +4,7 @@ import {
   getFunctionUrl,
   testFunction,
   assertValidResponse,
-  testCorsPrefligh,
+  testCorsPreflight,
   assertValidCors,
   TEST_USER_EMAIL,
 } from "../_shared/test-utils.ts";
@@ -50,7 +50,7 @@ Deno.test("test-llm: handles missing prompt with default", async () => {
 });
 
 Deno.test("test-llm: handles CORS preflight request", async () => {
-  const response = await testCorsPrefligh(FUNCTION_URL);
+  const response = await testCorsPreflight(FUNCTION_URL);
 
   assertValidResponse(response, 200, false); // CORS preflight doesn't return JSON
   assertValidCors(response);

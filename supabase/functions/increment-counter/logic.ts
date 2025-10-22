@@ -86,7 +86,7 @@ export async function incrementCounter(): Promise<CounterResult> {
       throw error;
     }
     throw new CounterError(
-      `Database error: ${error.message}`,
+      `Database error: ${error instanceof Error ? error.message : String(error)}`,
       'DATABASE_ERROR',
       500
     );

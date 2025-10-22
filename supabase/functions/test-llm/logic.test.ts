@@ -22,7 +22,7 @@ Deno.test("callLLM: successfully calls OpenAI with valid input", async () => {
   console.log("✅ LLM Response:", result.response);
 });
 
-Deno.test("callLLM: uses default values for missing params", async () => {
+Deno.test("callLLM: handles empty strings with default values", async () => {
   const result = await callLLM({
     prompt: "",
     user_email: "",
